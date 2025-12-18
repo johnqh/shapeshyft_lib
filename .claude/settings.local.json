@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm view:*)",
+      "Bash(bun install:*)",
+      "Bash(bunx tsc:*)",
+      "Bash(bunx eslint:*)",
+      "Bash(bun add:*)",
+      "Bash(bunx vitest run:*)",
+      "Bash(git -C /Users/johnhuang/shapeshyft/shapeshyft_lib status)",
+      "Bash(git -C /Users/johnhuang/shapeshyft/shapeshyft_lib diff --stat)",
+      "Bash(git -C /Users/johnhuang/shapeshyft/shapeshyft_lib log --oneline -3)",
+      "Bash(git -C /Users/johnhuang/shapeshyft/shapeshyft_lib remote:*)"
+    ]
+  }
+}

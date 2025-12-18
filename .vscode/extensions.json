@@ -1,0 +1,38 @@
+{
+  "recommendations": [
+    // Essential for TypeScript development
+    "ms-vscode.vscode-typescript-next",
+
+    // Code quality and formatting
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+
+    // Testing support
+    "vitest.explorer",
+
+    // Git integration
+    "eamodio.gitlens",
+
+    // React development
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-json",
+
+    // Developer productivity
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag",
+
+    // Documentation
+    "yzhang.markdown-all-in-one",
+
+    // Optional but helpful for this project
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-typescript-next"
+  ],
+  "unwantedRecommendations": [
+    // These extensions can conflict or are not needed
+    "ms-vscode.vscode-json-languageservice",
+    "hookyqr.beautify"
+  ]
+}

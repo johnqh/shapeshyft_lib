@@ -1,0 +1,64 @@
+{
+  "name": "@sudobility/shapeshyft_lib",
+  "version": "0.0.1",
+  "description": "Business logic library for ShapeShyft with Zustand stores",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "bunx tsc -p tsconfig.build.json",
+    "build:watch": "bunx tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run clean && bun run build",
+    "test": "bunx vitest",
+    "test:run": "bunx vitest run",
+    "lint": "bunx eslint src --ext .ts,.tsx",
+    "lint:fix": "bunx eslint src --ext .ts,.tsx --fix",
+    "format": "bunx prettier --write src/**/*.ts",
+    "format:check": "bunx prettier --check src/**/*.ts",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "keywords": [
+    "shapeshyft",
+    "llm",
+    "business-logic",
+    "zustand",
+    "react",
+    "typescript"
+  ],
+  "author": "John Huang",
+  "license": "MIT",
+  "dependencies": {
+    "zustand": "^5.0.8"
+  },
+  "peerDependencies": {
+    "@sudobility/types": "^1.9.31",
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@sudobility/shapeshyft_client": "link:@sudobility/shapeshyft_client",
+    "@sudobility/shapeshyft_types": "link:@sudobility/shapeshyft_types",
+    "@sudobility/types": "^1.9.31",
+    "@tanstack/react-query": "^5.90.5",
+    "@types/node": "^24.9.1",
+    "@types/react": "^19.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.4"
+  }
+}
