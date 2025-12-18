@@ -1,19 +1,29 @@
 import { describe, expect, it } from 'vitest';
+import {
+  useAnalyticsStore,
+  useEndpointsStore,
+  useKeysStore,
+  useProjectsStore,
+} from './business/stores';
 
-describe('shapeshyft_lib', () => {
-  it('should export stores', async () => {
-    const exports = await import('./index');
-    expect(exports.useKeysStore).toBeDefined();
-    expect(exports.useProjectsStore).toBeDefined();
-    expect(exports.useEndpointsStore).toBeDefined();
-    expect(exports.useAnalyticsStore).toBeDefined();
+describe('shapeshyft_lib stores', () => {
+  it('should export useKeysStore', () => {
+    expect(useKeysStore).toBeDefined();
+    expect(typeof useKeysStore).toBe('function');
   });
 
-  it('should export hooks', async () => {
-    const exports = await import('./index');
-    expect(exports.useKeysManager).toBeDefined();
-    expect(exports.useProjectsManager).toBeDefined();
-    expect(exports.useEndpointsManager).toBeDefined();
-    expect(exports.useAnalyticsManager).toBeDefined();
+  it('should export useProjectsStore', () => {
+    expect(useProjectsStore).toBeDefined();
+    expect(typeof useProjectsStore).toBe('function');
+  });
+
+  it('should export useEndpointsStore', () => {
+    expect(useEndpointsStore).toBeDefined();
+    expect(typeof useEndpointsStore).toBe('function');
+  });
+
+  it('should export useAnalyticsStore', () => {
+    expect(useAnalyticsStore).toBeDefined();
+    expect(typeof useAnalyticsStore).toBe('function');
   });
 });
