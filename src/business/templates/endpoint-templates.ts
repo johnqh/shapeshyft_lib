@@ -4,7 +4,6 @@
 
 import type {
   EndpointCreateRequest,
-  EndpointType,
   JsonSchema,
   ProjectCreateRequest,
 } from '@sudobility/shapeshyft_types';
@@ -26,7 +25,6 @@ export interface ProjectTemplate {
 export interface EndpointTemplate {
   endpoint_name: string;
   display_name: string;
-  endpoint_type: EndpointType;
   input_schema: JsonSchema;
   output_schema: JsonSchema;
   description: string;
@@ -45,7 +43,6 @@ export const textClassifierTemplate: ProjectTemplate = {
     {
       endpoint_name: 'classify',
       display_name: 'Classify Text',
-      endpoint_type: 'text_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -99,7 +96,6 @@ export const sentimentAnalyzerTemplate: ProjectTemplate = {
     {
       endpoint_name: 'analyze',
       display_name: 'Analyze Sentiment',
-      endpoint_type: 'text_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -161,7 +157,6 @@ export const dataExtractorTemplate: ProjectTemplate = {
     {
       endpoint_name: 'extract-entities',
       display_name: 'Extract Entities',
-      endpoint_type: 'text_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -203,7 +198,6 @@ export const dataExtractorTemplate: ProjectTemplate = {
     {
       endpoint_name: 'extract-fields',
       display_name: 'Extract Fields',
-      endpoint_type: 'structured_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -261,7 +255,6 @@ export const contentGeneratorTemplate: ProjectTemplate = {
     {
       endpoint_name: 'generate-summary',
       display_name: 'Generate Summary',
-      endpoint_type: 'text_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -308,7 +301,6 @@ export const contentGeneratorTemplate: ProjectTemplate = {
     {
       endpoint_name: 'generate-response',
       display_name: 'Generate Response',
-      endpoint_type: 'structured_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -365,7 +357,6 @@ export const localizationTemplate: ProjectTemplate = {
     {
       endpoint_name: 'translate-batch',
       display_name: 'Batch Translate',
-      endpoint_type: 'structured_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -418,7 +409,6 @@ export const localizationTemplate: ProjectTemplate = {
     {
       endpoint_name: 'translate-single',
       display_name: 'Single Translate',
-      endpoint_type: 'structured_in_structured_out',
       input_schema: {
         type: 'object',
         properties: {
@@ -498,7 +488,6 @@ export function applyTemplate(
     endpoint_name: ep.endpoint_name,
     display_name: ep.display_name,
     http_method: 'POST',
-    endpoint_type: ep.endpoint_type,
     llm_key_id: llmKeyId,
     input_schema: ep.input_schema,
     output_schema: ep.output_schema,
