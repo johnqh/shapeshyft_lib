@@ -47,6 +47,7 @@ export interface UseEndpointTesterReturn {
   error: Optional<string>;
 
   testEndpoint: (
+    organizationPath: string,
     projectName: string,
     endpoint: Endpoint,
     sampleInput: unknown
@@ -273,6 +274,7 @@ export const useEndpointTester = (
    */
   const testEndpoint = useCallback(
     async (
+      organizationPath: string,
       projectName: string,
       endpoint: Endpoint,
       sampleInput: unknown
@@ -306,6 +308,7 @@ export const useEndpointTester = (
 
         // Execute the endpoint
         const response = await aiExecute.execute(
+          organizationPath,
           projectName,
           endpoint.endpoint_name,
           sampleInput,
