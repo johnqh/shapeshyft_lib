@@ -52,6 +52,12 @@ export interface UseEndpointTesterReturn {
     endpoint: Endpoint,
     sampleInput: unknown
   ) => Promise<TestResult>;
+  getPrompt: (
+    organizationPath: string,
+    projectName: string,
+    endpointName: string,
+    input: unknown
+  ) => Promise<{ success: boolean; prompt?: string; error?: string }>;
   generateSampleInput: (inputSchema: JsonSchema | null) => unknown;
   validateInput: (
     input: unknown,
@@ -369,6 +375,43 @@ export const useEndpointTester = (
   );
 
   /**
+   * Get the prompt for an endpoint without executing
+   */
+  const getPrompt = useCallback(
+    async (
+      organizationPath: string,
+      projectName: string,
+      endpointName: string,
+      input: unknown
+    ): Promise<{ success: boolean; prompt?: string; error?: string }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await aiExecute.getPrompt(
+          organizationPath,
+          projectName,
+          endpointName,
+          input
+        );
+
+        if (response.success && response.data) {
+          return { success: true, prompt: response.data.prompt };
+        } else {
+          return { success: false, error: response.error || 'Failed to get prompt' };
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to get prompt';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [aiExecute]
+  );
+
+  /**
    * Clear all test results
    */
   const clearResults = useCallback(() => {
@@ -382,6 +425,7 @@ export const useEndpointTester = (
       isLoading,
       error,
       testEndpoint,
+      getPrompt,
       generateSampleInput,
       validateInput,
       clearResults,
@@ -391,6 +435,7 @@ export const useEndpointTester = (
       isLoading,
       error,
       testEndpoint,
+      getPrompt,
       generateSampleInput,
       validateInput,
       clearResults,
