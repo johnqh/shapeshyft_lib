@@ -5,12 +5,12 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import type {
+  AnalyticsResponse,
   NetworkClient,
   Optional,
   UsageAnalyticsQueryParams,
 } from '@sudobility/shapeshyft_types';
 import {
-  type AnalyticsData,
   type FirebaseIdToken,
   useAnalytics,
 } from '@sudobility/shapeshyft_client';
@@ -34,7 +34,7 @@ export interface UseAnalyticsManagerConfig {
  * Return type for useAnalyticsManager
  */
 export interface UseAnalyticsManagerReturn {
-  analytics: Optional<AnalyticsData>;
+  analytics: Optional<AnalyticsResponse>;
   isLoading: boolean;
   error: Optional<string>;
   isCached: boolean;

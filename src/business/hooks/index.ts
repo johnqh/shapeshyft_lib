@@ -23,6 +23,12 @@ export {
 } from './useAnalyticsManager';
 
 export {
+  useSettingsManager,
+  type UseSettingsManagerConfig,
+  type UseSettingsManagerReturn,
+} from './useSettingsManager';
+
+export {
   useEndpointTester,
   type UseEndpointTesterReturn,
   type TestResult,

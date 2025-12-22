@@ -4,14 +4,14 @@
  */
 
 import { create } from 'zustand';
-import type { AnalyticsData } from '@sudobility/shapeshyft_client';
+import type { AnalyticsResponse } from '@sudobility/shapeshyft_types';
 
 /**
  * Analytics cache entry
  */
 interface AnalyticsCacheEntry {
   /** Analytics data for this user */
-  analytics: AnalyticsData;
+  analytics: AnalyticsResponse;
   /** Timestamp when this data was cached */
   cachedAt: number;
 }
@@ -23,9 +23,9 @@ interface AnalyticsStoreState {
   /** Cache of analytics keyed by user ID */
   cache: Record<string, AnalyticsCacheEntry>;
   /** Set analytics for a specific user ID */
-  setAnalytics: (userId: string, analytics: AnalyticsData) => void;
+  setAnalytics: (userId: string, analytics: AnalyticsResponse) => void;
   /** Get analytics for a specific user ID */
-  getAnalytics: (userId: string) => AnalyticsData | undefined;
+  getAnalytics: (userId: string) => AnalyticsResponse | undefined;
   /** Get cache entry for a specific user ID */
   getCacheEntry: (userId: string) => AnalyticsCacheEntry | undefined;
   /** Clear analytics for a specific user ID */
@@ -40,7 +40,7 @@ interface AnalyticsStoreState {
 export const useAnalyticsStore = create<AnalyticsStoreState>((set, get) => ({
   cache: {},
 
-  setAnalytics: (userId: string, analytics: AnalyticsData) =>
+  setAnalytics: (userId: string, analytics: AnalyticsResponse) =>
     set(state => ({
       cache: {
         ...state.cache,
