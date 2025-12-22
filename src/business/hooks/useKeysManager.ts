@@ -3,7 +3,7 @@
  * Business logic hook that wraps the client useKeys hook with Zustand caching
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   LlmApiKeyCreateRequest,
   LlmApiKeySafe,
@@ -53,28 +53,41 @@ export const useKeysManager = ({
   token,
   autoFetch = true,
 }: UseKeysManagerConfig): UseKeysManagerReturn => {
-  const clientHook = useKeys(networkClient, baseUrl);
-  const store = useKeysStore();
+  const {
+    keys: clientKeys,
+    isLoading,
+    error,
+    refresh: clientRefresh,
+    createKey: clientCreateKey,
+    updateKey: clientUpdateKey,
+    deleteKey: clientDeleteKey,
+    clearError,
+  } = useKeys(networkClient, baseUrl);
+  const cacheEntry = useKeysStore(
+    useCallback(state => state.cache[userId], [userId])
+  );
+  const setKeys = useKeysStore(state => state.setKeys);
+  const addKey = useKeysStore(state => state.addKey);
+  const updateKeyInStore = useKeysStore(state => state.updateKey);
+  const removeKey = useKeysStore(state => state.removeKey);
 
   // Get cached data
-  const cacheEntry = store.getCacheEntry(userId);
   const cachedKeys = cacheEntry?.keys;
   const cachedAt = cacheEntry?.cachedAt;
 
   // Determine data source - prefer fresh client data, fall back to cache
   const keys = useMemo(
-    () => (clientHook.keys.length > 0 ? clientHook.keys : (cachedKeys ?? [])),
-    [clientHook.keys, cachedKeys]
+    () => (clientKeys.length > 0 ? clientKeys : (cachedKeys ?? [])),
+    [clientKeys, cachedKeys]
   );
-  const isCached =
-    clientHook.keys.length === 0 && (cachedKeys?.length ?? 0) > 0;
+  const isCached = clientKeys.length === 0 && (cachedKeys?.length ?? 0) > 0;
 
   // Sync client data to store when it changes
   useEffect(() => {
-    if (clientHook.keys.length > 0) {
-      store.setKeys(userId, clientHook.keys);
+    if (clientKeys.length > 0) {
+      setKeys(userId, clientKeys);
     }
-  }, [clientHook.keys, userId, store]);
+  }, [clientKeys, userId, setKeys]);
 
   /**
    * Refresh keys from server
@@ -83,8 +96,8 @@ export const useKeysManager = ({
     if (!token) {
       return;
     }
-    await clientHook.refresh(userId, token);
-  }, [clientHook, userId, token]);
+    await clientRefresh(userId, token);
+  }, [clientRefresh, userId, token]);
 
   /**
    * Create a new key
@@ -94,12 +107,12 @@ export const useKeysManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.createKey(userId, data, token);
+      const response = await clientCreateKey(userId, data, token);
       if (response.success && response.data) {
-        store.addKey(userId, response.data);
+        addKey(userId, response.data);
       }
     },
-    [clientHook, userId, token, store]
+    [clientCreateKey, userId, token, addKey]
   );
 
   /**
@@ -110,12 +123,12 @@ export const useKeysManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.updateKey(userId, keyId, data, token);
+      const response = await clientUpdateKey(userId, keyId, data, token);
       if (response.success && response.data) {
-        store.updateKey(userId, keyId, response.data);
+        updateKeyInStore(userId, keyId, response.data);
       }
     },
-    [clientHook, userId, token, store]
+    [clientUpdateKey, userId, token, updateKeyInStore]
   );
 
   /**
@@ -126,39 +139,53 @@ export const useKeysManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.deleteKey(userId, keyId, token);
+      const response = await clientDeleteKey(userId, keyId, token);
       if (response.success) {
-        store.removeKey(userId, keyId);
+        removeKey(userId, keyId);
       }
     },
-    [clientHook, userId, token, store]
+    [clientDeleteKey, userId, token, removeKey]
   );
 
-  // Auto-fetch on mount if enabled and token is available
+  // Track if we've already attempted auto-fetch to prevent retry loops
+  const hasAttemptedFetchRef = useRef(false);
+
+  // Auto-fetch on mount (only once per token)
   useEffect(() => {
-    if (autoFetch && token && keys.length === 0) {
+    if (
+      autoFetch &&
+      token &&
+      keys.length === 0 &&
+      !hasAttemptedFetchRef.current
+    ) {
+      hasAttemptedFetchRef.current = true;
       refresh();
     }
   }, [autoFetch, token, keys.length, refresh]);
 
+  // Reset attempt flag when token changes (e.g., user re-authenticates)
+  useEffect(() => {
+    hasAttemptedFetchRef.current = false;
+  }, [token]);
+
   return useMemo(
     () => ({
       keys,
-      isLoading: clientHook.isLoading,
-      error: clientHook.error,
+      isLoading,
+      error,
       isCached,
       cachedAt: cachedAt ?? null,
       refresh,
       createKey,
       updateKey,
       deleteKey,
-      clearError: clientHook.clearError,
+      clearError,
     }),
     [
       keys,
-      clientHook.isLoading,
-      clientHook.error,
-      clientHook.clearError,
+      isLoading,
+      error,
+      clearError,
       isCached,
       cachedAt,
       refresh,

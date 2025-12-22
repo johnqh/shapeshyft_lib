@@ -55,25 +55,32 @@ export const useAnalyticsManager = ({
   autoFetch = true,
   params,
 }: UseAnalyticsManagerConfig): UseAnalyticsManagerReturn => {
-  const clientHook = useAnalytics(networkClient, baseUrl);
-  const store = useAnalyticsStore();
+  const {
+    analytics: clientAnalytics,
+    isLoading,
+    error,
+    refresh: clientRefresh,
+    clearError,
+  } = useAnalytics(networkClient, baseUrl);
+  const cacheEntry = useAnalyticsStore(
+    useCallback(state => state.cache[userId], [userId])
+  );
+  const setAnalytics = useAnalyticsStore(state => state.setAnalytics);
 
   // Get cached data
-  const cacheEntry = store.getCacheEntry(userId);
   const cachedAnalytics = cacheEntry?.analytics;
   const cachedAt = cacheEntry?.cachedAt;
 
   // Determine data source
-  const analytics = clientHook.analytics ?? cachedAnalytics ?? null;
-  const isCached =
-    clientHook.analytics === null && cachedAnalytics !== undefined;
+  const analytics = clientAnalytics ?? cachedAnalytics ?? null;
+  const isCached = clientAnalytics === null && cachedAnalytics !== undefined;
 
   // Sync client data to store
   useEffect(() => {
-    if (clientHook.analytics) {
-      store.setAnalytics(userId, clientHook.analytics);
+    if (clientAnalytics) {
+      setAnalytics(userId, clientAnalytics);
     }
-  }, [clientHook.analytics, userId, store]);
+  }, [clientAnalytics, userId, setAnalytics]);
 
   /**
    * Refresh analytics from server
@@ -83,9 +90,9 @@ export const useAnalyticsManager = ({
       if (!token) {
         return;
       }
-      await clientHook.refresh(userId, token, queryParams ?? params);
+      await clientRefresh(userId, token, queryParams ?? params);
     },
-    [clientHook, userId, token, params]
+    [clientRefresh, userId, token, params]
   );
 
   // Auto-fetch on mount
@@ -98,21 +105,13 @@ export const useAnalyticsManager = ({
   return useMemo(
     () => ({
       analytics,
-      isLoading: clientHook.isLoading,
-      error: clientHook.error,
+      isLoading,
+      error,
       isCached,
       cachedAt: cachedAt ?? null,
       refresh,
-      clearError: clientHook.clearError,
+      clearError,
     }),
-    [
-      analytics,
-      clientHook.isLoading,
-      clientHook.error,
-      clientHook.clearError,
-      isCached,
-      cachedAt,
-      refresh,
-    ]
+    [analytics, isLoading, error, clearError, isCached, cachedAt, refresh]
   );
 };

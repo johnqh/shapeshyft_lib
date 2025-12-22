@@ -3,7 +3,7 @@
  * Business logic hook that wraps the client useProjects hook with Zustand caching
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   NetworkClient,
   Optional,
@@ -63,31 +63,42 @@ export const useProjectsManager = ({
   autoFetch = true,
   params,
 }: UseProjectsManagerConfig): UseProjectsManagerReturn => {
-  const clientHook = useProjects(networkClient, baseUrl);
-  const store = useProjectsStore();
+  const {
+    projects: clientProjects,
+    isLoading,
+    error,
+    refresh: clientRefresh,
+    createProject: clientCreateProject,
+    updateProject: clientUpdateProject,
+    deleteProject: clientDeleteProject,
+    clearError,
+  } = useProjects(networkClient, baseUrl);
+  const cacheEntry = useProjectsStore(
+    useCallback(state => state.cache[userId], [userId])
+  );
+  const setProjects = useProjectsStore(state => state.setProjects);
+  const addProject = useProjectsStore(state => state.addProject);
+  const updateProjectInStore = useProjectsStore(state => state.updateProject);
+  const removeProject = useProjectsStore(state => state.removeProject);
 
   // Get cached data
-  const cacheEntry = store.getCacheEntry(userId);
   const cachedProjects = cacheEntry?.projects;
   const cachedAt = cacheEntry?.cachedAt;
 
   // Determine data source - memoize to prevent dependency changes
   const projects = useMemo(
-    () =>
-      clientHook.projects.length > 0
-        ? clientHook.projects
-        : (cachedProjects ?? []),
-    [clientHook.projects, cachedProjects]
+    () => (clientProjects.length > 0 ? clientProjects : (cachedProjects ?? [])),
+    [clientProjects, cachedProjects]
   );
   const isCached =
-    clientHook.projects.length === 0 && (cachedProjects?.length ?? 0) > 0;
+    clientProjects.length === 0 && (cachedProjects?.length ?? 0) > 0;
 
   // Sync client data to store
   useEffect(() => {
-    if (clientHook.projects.length > 0) {
-      store.setProjects(userId, clientHook.projects);
+    if (clientProjects.length > 0) {
+      setProjects(userId, clientProjects);
     }
-  }, [clientHook.projects, userId, store]);
+  }, [clientProjects, userId, setProjects]);
 
   /**
    * Refresh projects from server
@@ -97,9 +108,9 @@ export const useProjectsManager = ({
       if (!token) {
         return;
       }
-      await clientHook.refresh(userId, token, queryParams ?? params);
+      await clientRefresh(userId, token, queryParams ?? params);
     },
-    [clientHook, userId, token, params]
+    [clientRefresh, userId, token, params]
   );
 
   /**
@@ -110,12 +121,12 @@ export const useProjectsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.createProject(userId, data, token);
+      const response = await clientCreateProject(userId, data, token);
       if (response.success && response.data) {
-        store.addProject(userId, response.data);
+        addProject(userId, response.data);
       }
     },
-    [clientHook, userId, token, store]
+    [clientCreateProject, userId, token, addProject]
   );
 
   /**
@@ -126,17 +137,17 @@ export const useProjectsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.updateProject(
+      const response = await clientUpdateProject(
         userId,
         projectId,
         data,
         token
       );
       if (response.success && response.data) {
-        store.updateProject(userId, projectId, response.data);
+        updateProjectInStore(userId, projectId, response.data);
       }
     },
-    [clientHook, userId, token, store]
+    [clientUpdateProject, userId, token, updateProjectInStore]
   );
 
   /**
@@ -147,39 +158,53 @@ export const useProjectsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.deleteProject(userId, projectId, token);
+      const response = await clientDeleteProject(userId, projectId, token);
       if (response.success) {
-        store.removeProject(userId, projectId);
+        removeProject(userId, projectId);
       }
     },
-    [clientHook, userId, token, store]
+    [clientDeleteProject, userId, token, removeProject]
   );
 
-  // Auto-fetch on mount
+  // Track if we've already attempted auto-fetch to prevent retry loops
+  const hasAttemptedFetchRef = useRef(false);
+
+  // Auto-fetch on mount (only once per token)
   useEffect(() => {
-    if (autoFetch && token && projects.length === 0) {
+    if (
+      autoFetch &&
+      token &&
+      projects.length === 0 &&
+      !hasAttemptedFetchRef.current
+    ) {
+      hasAttemptedFetchRef.current = true;
       refresh();
     }
   }, [autoFetch, token, projects.length, refresh]);
 
+  // Reset attempt flag when token changes (e.g., user re-authenticates)
+  useEffect(() => {
+    hasAttemptedFetchRef.current = false;
+  }, [token]);
+
   return useMemo(
     () => ({
       projects,
-      isLoading: clientHook.isLoading,
-      error: clientHook.error,
+      isLoading,
+      error,
       isCached,
       cachedAt: cachedAt ?? null,
       refresh,
       createProject,
       updateProject,
       deleteProject,
-      clearError: clientHook.clearError,
+      clearError,
     }),
     [
       projects,
-      clientHook.isLoading,
-      clientHook.error,
-      clientHook.clearError,
+      isLoading,
+      error,
+      clearError,
       isCached,
       cachedAt,
       refresh,

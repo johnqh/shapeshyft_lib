@@ -3,7 +3,7 @@
  * Business logic hook that wraps the client useEndpoints hook with Zustand caching
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   Endpoint,
   EndpointCreateRequest,
@@ -65,31 +65,46 @@ export const useEndpointsManager = ({
   autoFetch = true,
   params,
 }: UseEndpointsManagerConfig): UseEndpointsManagerReturn => {
-  const clientHook = useEndpoints(networkClient, baseUrl);
-  const store = useEndpointsStore();
+  const {
+    endpoints: clientEndpoints,
+    isLoading,
+    error,
+    refresh: clientRefresh,
+    createEndpoint: clientCreateEndpoint,
+    updateEndpoint: clientUpdateEndpoint,
+    deleteEndpoint: clientDeleteEndpoint,
+    clearError,
+  } = useEndpoints(networkClient, baseUrl);
+  const cacheKey = useMemo(() => `${userId}:${projectId}`, [userId, projectId]);
+  const cacheEntry = useEndpointsStore(
+    useCallback(state => state.cache[cacheKey], [cacheKey])
+  );
+  const setEndpoints = useEndpointsStore(state => state.setEndpoints);
+  const addEndpoint = useEndpointsStore(state => state.addEndpoint);
+  const updateEndpointInStore = useEndpointsStore(
+    state => state.updateEndpoint
+  );
+  const removeEndpoint = useEndpointsStore(state => state.removeEndpoint);
 
   // Get cached data
-  const cacheEntry = store.getCacheEntry(userId, projectId);
   const cachedEndpoints = cacheEntry?.endpoints;
   const cachedAt = cacheEntry?.cachedAt;
 
   // Determine data source - memoize to prevent dependency changes
   const endpoints = useMemo(
     () =>
-      clientHook.endpoints.length > 0
-        ? clientHook.endpoints
-        : (cachedEndpoints ?? []),
-    [clientHook.endpoints, cachedEndpoints]
+      clientEndpoints.length > 0 ? clientEndpoints : (cachedEndpoints ?? []),
+    [clientEndpoints, cachedEndpoints]
   );
   const isCached =
-    clientHook.endpoints.length === 0 && (cachedEndpoints?.length ?? 0) > 0;
+    clientEndpoints.length === 0 && (cachedEndpoints?.length ?? 0) > 0;
 
   // Sync client data to store
   useEffect(() => {
-    if (clientHook.endpoints.length > 0) {
-      store.setEndpoints(userId, projectId, clientHook.endpoints);
+    if (clientEndpoints.length > 0) {
+      setEndpoints(userId, projectId, clientEndpoints);
     }
-  }, [clientHook.endpoints, userId, projectId, store]);
+  }, [clientEndpoints, userId, projectId, setEndpoints]);
 
   /**
    * Refresh endpoints from server
@@ -99,9 +114,9 @@ export const useEndpointsManager = ({
       if (!token) {
         return;
       }
-      await clientHook.refresh(userId, projectId, token, queryParams ?? params);
+      await clientRefresh(userId, projectId, token, queryParams ?? params);
     },
-    [clientHook, userId, projectId, token, params]
+    [clientRefresh, userId, projectId, token, params]
   );
 
   /**
@@ -112,17 +127,17 @@ export const useEndpointsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.createEndpoint(
+      const response = await clientCreateEndpoint(
         userId,
         projectId,
         data,
         token
       );
       if (response.success && response.data) {
-        store.addEndpoint(userId, projectId, response.data);
+        addEndpoint(userId, projectId, response.data);
       }
     },
-    [clientHook, userId, projectId, token, store]
+    [clientCreateEndpoint, userId, projectId, token, addEndpoint]
   );
 
   /**
@@ -133,7 +148,7 @@ export const useEndpointsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.updateEndpoint(
+      const response = await clientUpdateEndpoint(
         userId,
         projectId,
         endpointId,
@@ -141,10 +156,10 @@ export const useEndpointsManager = ({
         token
       );
       if (response.success && response.data) {
-        store.updateEndpoint(userId, projectId, endpointId, response.data);
+        updateEndpointInStore(userId, projectId, endpointId, response.data);
       }
     },
-    [clientHook, userId, projectId, token, store]
+    [clientUpdateEndpoint, userId, projectId, token, updateEndpointInStore]
   );
 
   /**
@@ -155,44 +170,58 @@ export const useEndpointsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientHook.deleteEndpoint(
+      const response = await clientDeleteEndpoint(
         userId,
         projectId,
         endpointId,
         token
       );
       if (response.success) {
-        store.removeEndpoint(userId, projectId, endpointId);
+        removeEndpoint(userId, projectId, endpointId);
       }
     },
-    [clientHook, userId, projectId, token, store]
+    [clientDeleteEndpoint, userId, projectId, token, removeEndpoint]
   );
 
-  // Auto-fetch on mount
+  // Track if we've already attempted auto-fetch to prevent retry loops
+  const hasAttemptedFetchRef = useRef(false);
+
+  // Auto-fetch on mount (only once per token)
   useEffect(() => {
-    if (autoFetch && token && endpoints.length === 0) {
+    if (
+      autoFetch &&
+      token &&
+      endpoints.length === 0 &&
+      !hasAttemptedFetchRef.current
+    ) {
+      hasAttemptedFetchRef.current = true;
       refresh();
     }
   }, [autoFetch, token, endpoints.length, refresh]);
 
+  // Reset attempt flag when token changes (e.g., user re-authenticates)
+  useEffect(() => {
+    hasAttemptedFetchRef.current = false;
+  }, [token]);
+
   return useMemo(
     () => ({
       endpoints,
-      isLoading: clientHook.isLoading,
-      error: clientHook.error,
+      isLoading,
+      error,
       isCached,
       cachedAt: cachedAt ?? null,
       refresh,
       createEndpoint,
       updateEndpoint,
       deleteEndpoint,
-      clearError: clientHook.clearError,
+      clearError,
     }),
     [
       endpoints,
-      clientHook.isLoading,
-      clientHook.error,
-      clientHook.clearError,
+      isLoading,
+      error,
+      clearError,
       isCached,
       cachedAt,
       refresh,
