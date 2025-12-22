@@ -48,7 +48,7 @@ export interface UseEndpointsManagerReturn {
   updateEndpoint: (
     endpointId: string,
     data: EndpointUpdateRequest
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   deleteEndpoint: (endpointId: string) => Promise<void>;
   clearError: () => void;
 }
@@ -144,9 +144,9 @@ export const useEndpointsManager = ({
    * Update an endpoint
    */
   const updateEndpoint = useCallback(
-    async (endpointId: string, data: EndpointUpdateRequest): Promise<void> => {
+    async (endpointId: string, data: EndpointUpdateRequest): Promise<boolean> => {
       if (!token) {
-        return;
+        return false;
       }
       const response = await clientUpdateEndpoint(
         userId,
@@ -157,7 +157,9 @@ export const useEndpointsManager = ({
       );
       if (response.success && response.data) {
         updateEndpointInStore(userId, projectId, endpointId, response.data);
+        return true;
       }
+      return false;
     },
     [clientUpdateEndpoint, userId, projectId, token, updateEndpointInStore]
   );
