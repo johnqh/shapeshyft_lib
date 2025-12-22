@@ -43,7 +43,7 @@ export interface UseProjectsManagerReturn {
   cachedAt: Optional<number>;
 
   refresh: (params?: ProjectQueryParams) => Promise<void>;
-  createProject: (data: ProjectCreateRequest) => Promise<void>;
+  createProject: (data: ProjectCreateRequest) => Promise<Project | undefined>;
   updateProject: (
     projectId: string,
     data: ProjectUpdateRequest
@@ -117,14 +117,16 @@ export const useProjectsManager = ({
    * Create a new project
    */
   const createProject = useCallback(
-    async (data: ProjectCreateRequest): Promise<void> => {
+    async (data: ProjectCreateRequest): Promise<Project | undefined> => {
       if (!token) {
-        return;
+        return undefined;
       }
       const response = await clientCreateProject(userId, data, token);
       if (response.success && response.data) {
         addProject(userId, response.data);
+        return response.data;
       }
+      return undefined;
     },
     [clientCreateProject, userId, token, addProject]
   );
