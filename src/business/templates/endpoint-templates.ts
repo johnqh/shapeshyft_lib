@@ -27,7 +27,7 @@ export interface EndpointTemplate {
   display_name: string;
   input_schema: JsonSchema;
   output_schema: JsonSchema;
-  description: string;
+  instructions: string;
   context?: string;
 }
 
@@ -78,7 +78,7 @@ export const textClassifierTemplate: ProjectTemplate = {
         },
         required: ['category', 'confidence'],
       },
-      description:
+      instructions:
         'Classify the input text into one of the provided categories. Return the most appropriate category along with a confidence score.',
     },
   ],
@@ -139,7 +139,7 @@ export const sentimentAnalyzerTemplate: ProjectTemplate = {
         },
         required: ['sentiment', 'score'],
       },
-      description:
+      instructions:
         'Analyze the sentiment and emotions in the input text. Return the overall sentiment, a score, and detected emotions.',
     },
   ],
@@ -192,7 +192,7 @@ export const dataExtractorTemplate: ProjectTemplate = {
         },
         required: ['entities'],
       },
-      description:
+      instructions:
         'Extract named entities from the input text. If entity_types are specified, focus on those types.',
     },
     {
@@ -237,7 +237,7 @@ export const dataExtractorTemplate: ProjectTemplate = {
         },
         required: ['extracted'],
       },
-      description:
+      instructions:
         'Extract specific fields from the input text based on the provided field definitions.',
     },
   ],
@@ -295,7 +295,7 @@ export const contentGeneratorTemplate: ProjectTemplate = {
         },
         required: ['summary'],
       },
-      description:
+      instructions:
         'Generate a concise summary of the input text. Follow the specified style if provided.',
     },
     {
@@ -339,7 +339,7 @@ export const contentGeneratorTemplate: ProjectTemplate = {
         },
         required: ['response'],
       },
-      description:
+      instructions:
         'Generate a contextual response to the input message. Use the specified tone and stay within length limits.',
     },
   ],
@@ -403,7 +403,7 @@ export const localizationTemplate: ProjectTemplate = {
         },
         required: ['translations'],
       },
-      description:
+      instructions:
         'Translate each text in the texts array to all specified target languages. Return translations[i][j] as the translation of texts[i] into target_languages[j].',
     },
     {
@@ -450,7 +450,7 @@ export const localizationTemplate: ProjectTemplate = {
         },
         required: ['translation'],
       },
-      description:
+      instructions:
         'Translate a single text to the specified target language. Optionally provide context for better accuracy.',
     },
   ],
@@ -491,7 +491,7 @@ export function applyTemplate(
     llm_key_id: llmKeyId,
     input_schema: ep.input_schema,
     output_schema: ep.output_schema,
-    description: ep.description,
+    instructions: ep.instructions,
     context: ep.context,
   }));
 
