@@ -144,7 +144,10 @@ export const useEndpointsManager = ({
    * Update an endpoint
    */
   const updateEndpoint = useCallback(
-    async (endpointId: string, data: EndpointUpdateRequest): Promise<boolean> => {
+    async (
+      endpointId: string,
+      data: EndpointUpdateRequest
+    ): Promise<boolean> => {
       if (!token) {
         return false;
       }

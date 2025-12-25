@@ -398,10 +398,14 @@ export const useEndpointTester = (
         if (response.success && response.data) {
           return { success: true, prompt: response.data.prompt };
         } else {
-          return { success: false, error: response.error || 'Failed to get prompt' };
+          return {
+            success: false,
+            error: response.error || 'Failed to get prompt',
+          };
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to get prompt';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to get prompt';
         setError(errorMessage);
         return { success: false, error: errorMessage };
       } finally {

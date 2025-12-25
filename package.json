@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/shapeshyft_lib",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Business logic library for ShapeShyft with Zustand stores",
   "type": "module",
   "main": "dist/index.js",
