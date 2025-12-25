@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/shapeshyft_lib",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Business logic library for ShapeShyft with Zustand stores",
   "type": "module",
   "main": "dist/index.js",
@@ -38,16 +38,16 @@
     "zustand": "^5.0.8"
   },
   "peerDependencies": {
-    "@sudobility/shapeshyft_client": "^0.0.3",
-    "@sudobility/shapeshyft_types": "^1.0.5",
+    "@sudobility/shapeshyft_client": "^0.0.4",
+    "@sudobility/shapeshyft_types": "^1.0.6",
     "@sudobility/types": "^1.9.31",
     "@tanstack/react-query": ">=5.0.0",
     "react": ">=18.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@sudobility/shapeshyft_client": "^0.0.3",
-    "@sudobility/shapeshyft_types": "^1.0.5",
+    "@sudobility/shapeshyft_client": "^0.0.4",
+    "@sudobility/shapeshyft_types": "^1.0.6",
     "@sudobility/types": "^1.9.31",
     "@tanstack/react-query": "^5.90.5",
     "@types/node": "^24.9.1",
