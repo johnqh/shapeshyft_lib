@@ -1,6 +1,6 @@
 /**
  * Endpoints Store
- * Zustand store for caching endpoints by user ID and project ID
+ * Zustand store for caching endpoints by entity slug and project ID
  */
 
 import { create } from 'zustand';
@@ -17,50 +17,57 @@ interface EndpointsCacheEntry {
 }
 
 /**
- * Create a cache key from userId and projectId
+ * Create a cache key from entitySlug and projectId
  */
-function makeCacheKey(userId: string, projectId: string): string {
-  return `${userId}:${projectId}`;
+function makeCacheKey(entitySlug: string, projectId: string): string {
+  return `${entitySlug}:${projectId}`;
 }
 
 /**
  * Endpoints store state
  */
 interface EndpointsStoreState {
-  /** Cache of endpoints keyed by userId:projectId */
+  /** Cache of endpoints keyed by entitySlug:projectId */
   cache: Record<string, EndpointsCacheEntry>;
-  /** Set endpoints for a specific user/project */
+  /** Set endpoints for a specific entity/project */
   setEndpoints: (
-    userId: string,
+    entitySlug: string,
     projectId: string,
     endpoints: Endpoint[]
   ) => void;
-  /** Get endpoints for a specific user/project */
-  getEndpoints: (userId: string, projectId: string) => Endpoint[] | undefined;
-  /** Get cache entry for a specific user/project */
+  /** Get endpoints for a specific entity/project */
+  getEndpoints: (
+    entitySlug: string,
+    projectId: string
+  ) => Endpoint[] | undefined;
+  /** Get cache entry for a specific entity/project */
   getCacheEntry: (
-    userId: string,
+    entitySlug: string,
     projectId: string
   ) => EndpointsCacheEntry | undefined;
   /** Add a single endpoint to the cache */
-  addEndpoint: (userId: string, projectId: string, endpoint: Endpoint) => void;
+  addEndpoint: (
+    entitySlug: string,
+    projectId: string,
+    endpoint: Endpoint
+  ) => void;
   /** Update an endpoint in the cache */
   updateEndpoint: (
-    userId: string,
+    entitySlug: string,
     projectId: string,
     endpointId: string,
     endpoint: Endpoint
   ) => void;
   /** Remove an endpoint from the cache */
   removeEndpoint: (
-    userId: string,
+    entitySlug: string,
     projectId: string,
     endpointId: string
   ) => void;
-  /** Clear endpoints for a specific user/project */
-  clearEndpoints: (userId: string, projectId: string) => void;
-  /** Clear all endpoints for a user */
-  clearUserEndpoints: (userId: string) => void;
+  /** Clear endpoints for a specific entity/project */
+  clearEndpoints: (entitySlug: string, projectId: string) => void;
+  /** Clear all endpoints for an entity */
+  clearEntityEndpoints: (entitySlug: string) => void;
   /** Clear all cached endpoints */
   clearAll: () => void;
 }
@@ -71,8 +78,12 @@ interface EndpointsStoreState {
 export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
   cache: {},
 
-  setEndpoints: (userId: string, projectId: string, endpoints: Endpoint[]) => {
-    const key = makeCacheKey(userId, projectId);
+  setEndpoints: (
+    entitySlug: string,
+    projectId: string,
+    endpoints: Endpoint[]
+  ) => {
+    const key = makeCacheKey(entitySlug, projectId);
     set(state => ({
       cache: {
         ...state.cache,
@@ -84,19 +95,19 @@ export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
     }));
   },
 
-  getEndpoints: (userId: string, projectId: string) => {
-    const key = makeCacheKey(userId, projectId);
+  getEndpoints: (entitySlug: string, projectId: string) => {
+    const key = makeCacheKey(entitySlug, projectId);
     const entry = get().cache[key];
     return entry?.endpoints;
   },
 
-  getCacheEntry: (userId: string, projectId: string) => {
-    const key = makeCacheKey(userId, projectId);
+  getCacheEntry: (entitySlug: string, projectId: string) => {
+    const key = makeCacheKey(entitySlug, projectId);
     return get().cache[key];
   },
 
-  addEndpoint: (userId: string, projectId: string, endpoint: Endpoint) => {
-    const key = makeCacheKey(userId, projectId);
+  addEndpoint: (entitySlug: string, projectId: string, endpoint: Endpoint) => {
+    const key = makeCacheKey(entitySlug, projectId);
     set(state => {
       const existing = state.cache[key];
       if (!existing) {
@@ -123,12 +134,12 @@ export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
   },
 
   updateEndpoint: (
-    userId: string,
+    entitySlug: string,
     projectId: string,
     endpointId: string,
     endpoint: Endpoint
   ) => {
-    const key = makeCacheKey(userId, projectId);
+    const key = makeCacheKey(entitySlug, projectId);
     set(state => {
       const existing = state.cache[key];
       if (!existing) return state;
@@ -146,8 +157,12 @@ export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
     });
   },
 
-  removeEndpoint: (userId: string, projectId: string, endpointId: string) => {
-    const key = makeCacheKey(userId, projectId);
+  removeEndpoint: (
+    entitySlug: string,
+    projectId: string,
+    endpointId: string
+  ) => {
+    const key = makeCacheKey(entitySlug, projectId);
     set(state => {
       const existing = state.cache[key];
       if (!existing) return state;
@@ -163,8 +178,8 @@ export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
     });
   },
 
-  clearEndpoints: (userId: string, projectId: string) => {
-    const key = makeCacheKey(userId, projectId);
+  clearEndpoints: (entitySlug: string, projectId: string) => {
+    const key = makeCacheKey(entitySlug, projectId);
     set(state => {
       const newCache = { ...state.cache };
       delete newCache[key];
@@ -172,10 +187,10 @@ export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
     });
   },
 
-  clearUserEndpoints: (userId: string) =>
+  clearEntityEndpoints: (entitySlug: string) =>
     set(state => {
       const newCache: Record<string, EndpointsCacheEntry> = {};
-      const prefix = `${userId}:`;
+      const prefix = `${entitySlug}:`;
       for (const [key, value] of Object.entries(state.cache)) {
         if (!key.startsWith(prefix)) {
           newCache[key] = value;

@@ -24,7 +24,7 @@ import { useProjectsStore } from '../stores/projectsStore';
 export interface UseProjectsManagerConfig {
   baseUrl: string;
   networkClient: NetworkClient;
-  userId: string;
+  entitySlug: string;
   token: Optional<FirebaseIdToken>;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
@@ -58,7 +58,7 @@ export interface UseProjectsManagerReturn {
 export const useProjectsManager = ({
   baseUrl,
   networkClient,
-  userId,
+  entitySlug,
   token,
   autoFetch = true,
   params,
@@ -74,7 +74,7 @@ export const useProjectsManager = ({
     clearError,
   } = useProjects(networkClient, baseUrl);
   const cacheEntry = useProjectsStore(
-    useCallback(state => state.cache[userId], [userId])
+    useCallback(state => state.cache[entitySlug], [entitySlug])
   );
   const setProjects = useProjectsStore(state => state.setProjects);
   const addProject = useProjectsStore(state => state.addProject);
@@ -96,9 +96,9 @@ export const useProjectsManager = ({
   // Sync client data to store
   useEffect(() => {
     if (clientProjects.length > 0) {
-      setProjects(userId, clientProjects);
+      setProjects(entitySlug, clientProjects);
     }
-  }, [clientProjects, userId, setProjects]);
+  }, [clientProjects, entitySlug, setProjects]);
 
   /**
    * Refresh projects from server
@@ -108,9 +108,9 @@ export const useProjectsManager = ({
       if (!token) {
         return;
       }
-      await clientRefresh(userId, token, queryParams ?? params);
+      await clientRefresh(entitySlug, token, queryParams ?? params);
     },
-    [clientRefresh, userId, token, params]
+    [clientRefresh, entitySlug, token, params]
   );
 
   /**
@@ -121,14 +121,14 @@ export const useProjectsManager = ({
       if (!token) {
         return undefined;
       }
-      const response = await clientCreateProject(userId, data, token);
+      const response = await clientCreateProject(entitySlug, data, token);
       if (response.success && response.data) {
-        addProject(userId, response.data);
+        addProject(entitySlug, response.data);
         return response.data;
       }
       return undefined;
     },
-    [clientCreateProject, userId, token, addProject]
+    [clientCreateProject, entitySlug, token, addProject]
   );
 
   /**
@@ -140,16 +140,16 @@ export const useProjectsManager = ({
         return;
       }
       const response = await clientUpdateProject(
-        userId,
+        entitySlug,
         projectId,
         data,
         token
       );
       if (response.success && response.data) {
-        updateProjectInStore(userId, projectId, response.data);
+        updateProjectInStore(entitySlug, projectId, response.data);
       }
     },
-    [clientUpdateProject, userId, token, updateProjectInStore]
+    [clientUpdateProject, entitySlug, token, updateProjectInStore]
   );
 
   /**
@@ -160,12 +160,12 @@ export const useProjectsManager = ({
       if (!token) {
         return;
       }
-      const response = await clientDeleteProject(userId, projectId, token);
+      const response = await clientDeleteProject(entitySlug, projectId, token);
       if (response.success) {
-        removeProject(userId, projectId);
+        removeProject(entitySlug, projectId);
       }
     },
-    [clientDeleteProject, userId, token, removeProject]
+    [clientDeleteProject, entitySlug, token, removeProject]
   );
 
   // Track if we've already attempted auto-fetch to prevent retry loops

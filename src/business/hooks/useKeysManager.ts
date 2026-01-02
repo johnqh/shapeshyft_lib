@@ -20,7 +20,7 @@ import { useKeysStore } from '../stores/keysStore';
 export interface UseKeysManagerConfig {
   baseUrl: string;
   networkClient: NetworkClient;
-  userId: string;
+  entitySlug: string;
   token: Optional<FirebaseIdToken>;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
@@ -49,7 +49,7 @@ export interface UseKeysManagerReturn {
 export const useKeysManager = ({
   baseUrl,
   networkClient,
-  userId,
+  entitySlug,
   token,
   autoFetch = true,
 }: UseKeysManagerConfig): UseKeysManagerReturn => {
@@ -64,7 +64,7 @@ export const useKeysManager = ({
     clearError,
   } = useKeys(networkClient, baseUrl);
   const cacheEntry = useKeysStore(
-    useCallback(state => state.cache[userId], [userId])
+    useCallback(state => state.cache[entitySlug], [entitySlug])
   );
   const setKeys = useKeysStore(state => state.setKeys);
   const addKey = useKeysStore(state => state.addKey);
@@ -85,9 +85,9 @@ export const useKeysManager = ({
   // Sync client data to store when it changes
   useEffect(() => {
     if (clientKeys.length > 0) {
-      setKeys(userId, clientKeys);
+      setKeys(entitySlug, clientKeys);
     }
-  }, [clientKeys, userId, setKeys]);
+  }, [clientKeys, entitySlug, setKeys]);
 
   /**
    * Refresh keys from server
@@ -96,8 +96,8 @@ export const useKeysManager = ({
     if (!token) {
       return;
     }
-    await clientRefresh(userId, token);
-  }, [clientRefresh, userId, token]);
+    await clientRefresh(entitySlug, token);
+  }, [clientRefresh, entitySlug, token]);
 
   /**
    * Create a new key
@@ -107,12 +107,12 @@ export const useKeysManager = ({
       if (!token) {
         return;
       }
-      const response = await clientCreateKey(userId, data, token);
+      const response = await clientCreateKey(entitySlug, data, token);
       if (response.success && response.data) {
-        addKey(userId, response.data);
+        addKey(entitySlug, response.data);
       }
     },
-    [clientCreateKey, userId, token, addKey]
+    [clientCreateKey, entitySlug, token, addKey]
   );
 
   /**
@@ -123,12 +123,12 @@ export const useKeysManager = ({
       if (!token) {
         return;
       }
-      const response = await clientUpdateKey(userId, keyId, data, token);
+      const response = await clientUpdateKey(entitySlug, keyId, data, token);
       if (response.success && response.data) {
-        updateKeyInStore(userId, keyId, response.data);
+        updateKeyInStore(entitySlug, keyId, response.data);
       }
     },
-    [clientUpdateKey, userId, token, updateKeyInStore]
+    [clientUpdateKey, entitySlug, token, updateKeyInStore]
   );
 
   /**
@@ -139,12 +139,12 @@ export const useKeysManager = ({
       if (!token) {
         return;
       }
-      const response = await clientDeleteKey(userId, keyId, token);
+      const response = await clientDeleteKey(entitySlug, keyId, token);
       if (response.success) {
-        removeKey(userId, keyId);
+        removeKey(entitySlug, keyId);
       }
     },
-    [clientDeleteKey, userId, token, removeKey]
+    [clientDeleteKey, entitySlug, token, removeKey]
   );
 
   // Track if we've already attempted auto-fetch to prevent retry loops

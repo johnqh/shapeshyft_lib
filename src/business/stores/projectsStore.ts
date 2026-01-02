@@ -1,6 +1,6 @@
 /**
  * Projects Store
- * Zustand store for caching projects by user ID
+ * Zustand store for caching projects by entity slug
  */
 
 import { create } from 'zustand';
@@ -10,7 +10,7 @@ import type { Project } from '@sudobility/shapeshyft_types';
  * Projects cache entry
  */
 interface ProjectsCacheEntry {
-  /** Array of projects for this user */
+  /** Array of projects for this entity */
   projects: Project[];
   /** Timestamp when this data was cached */
   cachedAt: number;
@@ -20,22 +20,26 @@ interface ProjectsCacheEntry {
  * Projects store state
  */
 interface ProjectsStoreState {
-  /** Cache of projects keyed by user ID */
+  /** Cache of projects keyed by entity slug */
   cache: Record<string, ProjectsCacheEntry>;
-  /** Set projects for a specific user ID */
-  setProjects: (userId: string, projects: Project[]) => void;
-  /** Get projects for a specific user ID */
-  getProjects: (userId: string) => Project[] | undefined;
-  /** Get cache entry for a specific user ID */
-  getCacheEntry: (userId: string) => ProjectsCacheEntry | undefined;
+  /** Set projects for a specific entity slug */
+  setProjects: (entitySlug: string, projects: Project[]) => void;
+  /** Get projects for a specific entity slug */
+  getProjects: (entitySlug: string) => Project[] | undefined;
+  /** Get cache entry for a specific entity slug */
+  getCacheEntry: (entitySlug: string) => ProjectsCacheEntry | undefined;
   /** Add a single project to the cache */
-  addProject: (userId: string, project: Project) => void;
+  addProject: (entitySlug: string, project: Project) => void;
   /** Update a project in the cache */
-  updateProject: (userId: string, projectId: string, project: Project) => void;
+  updateProject: (
+    entitySlug: string,
+    projectId: string,
+    project: Project
+  ) => void;
   /** Remove a project from the cache */
-  removeProject: (userId: string, projectId: string) => void;
-  /** Clear projects for a specific user ID */
-  clearProjects: (userId: string) => void;
+  removeProject: (entitySlug: string, projectId: string) => void;
+  /** Clear projects for a specific entity slug */
+  clearProjects: (entitySlug: string) => void;
   /** Clear all cached projects */
   clearAll: () => void;
 }
@@ -46,34 +50,34 @@ interface ProjectsStoreState {
 export const useProjectsStore = create<ProjectsStoreState>((set, get) => ({
   cache: {},
 
-  setProjects: (userId: string, projects: Project[]) =>
+  setProjects: (entitySlug: string, projects: Project[]) =>
     set(state => ({
       cache: {
         ...state.cache,
-        [userId]: {
+        [entitySlug]: {
           projects,
           cachedAt: Date.now(),
         },
       },
     })),
 
-  getProjects: (userId: string) => {
-    const entry = get().cache[userId];
+  getProjects: (entitySlug: string) => {
+    const entry = get().cache[entitySlug];
     return entry?.projects;
   },
 
-  getCacheEntry: (userId: string) => {
-    return get().cache[userId];
+  getCacheEntry: (entitySlug: string) => {
+    return get().cache[entitySlug];
   },
 
-  addProject: (userId: string, project: Project) =>
+  addProject: (entitySlug: string, project: Project) =>
     set(state => {
-      const existing = state.cache[userId];
+      const existing = state.cache[entitySlug];
       if (!existing) {
         return {
           cache: {
             ...state.cache,
-            [userId]: {
+            [entitySlug]: {
               projects: [project],
               cachedAt: Date.now(),
             },
@@ -83,7 +87,7 @@ export const useProjectsStore = create<ProjectsStoreState>((set, get) => ({
       return {
         cache: {
           ...state.cache,
-          [userId]: {
+          [entitySlug]: {
             projects: [...existing.projects, project],
             cachedAt: Date.now(),
           },
@@ -91,14 +95,14 @@ export const useProjectsStore = create<ProjectsStoreState>((set, get) => ({
       };
     }),
 
-  updateProject: (userId: string, projectId: string, project: Project) =>
+  updateProject: (entitySlug: string, projectId: string, project: Project) =>
     set(state => {
-      const existing = state.cache[userId];
+      const existing = state.cache[entitySlug];
       if (!existing) return state;
       return {
         cache: {
           ...state.cache,
-          [userId]: {
+          [entitySlug]: {
             projects: existing.projects.map(p =>
               p.uuid === projectId ? project : p
             ),
@@ -108,14 +112,14 @@ export const useProjectsStore = create<ProjectsStoreState>((set, get) => ({
       };
     }),
 
-  removeProject: (userId: string, projectId: string) =>
+  removeProject: (entitySlug: string, projectId: string) =>
     set(state => {
-      const existing = state.cache[userId];
+      const existing = state.cache[entitySlug];
       if (!existing) return state;
       return {
         cache: {
           ...state.cache,
-          [userId]: {
+          [entitySlug]: {
             projects: existing.projects.filter(p => p.uuid !== projectId),
             cachedAt: Date.now(),
           },
@@ -123,10 +127,10 @@ export const useProjectsStore = create<ProjectsStoreState>((set, get) => ({
       };
     }),
 
-  clearProjects: (userId: string) =>
+  clearProjects: (entitySlug: string) =>
     set(state => {
       const newCache = { ...state.cache };
-      delete newCache[userId];
+      delete newCache[entitySlug];
       return { cache: newCache };
     }),
 

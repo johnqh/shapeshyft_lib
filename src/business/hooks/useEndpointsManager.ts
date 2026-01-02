@@ -24,7 +24,7 @@ import { useEndpointsStore } from '../stores/endpointsStore';
 export interface UseEndpointsManagerConfig {
   baseUrl: string;
   networkClient: NetworkClient;
-  userId: string;
+  entitySlug: string;
   projectId: string;
   token: Optional<FirebaseIdToken>;
   /** Auto-fetch on mount when token is available */
@@ -59,7 +59,7 @@ export interface UseEndpointsManagerReturn {
 export const useEndpointsManager = ({
   baseUrl,
   networkClient,
-  userId,
+  entitySlug,
   projectId,
   token,
   autoFetch = true,
@@ -75,7 +75,10 @@ export const useEndpointsManager = ({
     deleteEndpoint: clientDeleteEndpoint,
     clearError,
   } = useEndpoints(networkClient, baseUrl);
-  const cacheKey = useMemo(() => `${userId}:${projectId}`, [userId, projectId]);
+  const cacheKey = useMemo(
+    () => `${entitySlug}:${projectId}`,
+    [entitySlug, projectId]
+  );
   const cacheEntry = useEndpointsStore(
     useCallback(state => state.cache[cacheKey], [cacheKey])
   );
@@ -102,9 +105,9 @@ export const useEndpointsManager = ({
   // Sync client data to store
   useEffect(() => {
     if (clientEndpoints.length > 0) {
-      setEndpoints(userId, projectId, clientEndpoints);
+      setEndpoints(entitySlug, projectId, clientEndpoints);
     }
-  }, [clientEndpoints, userId, projectId, setEndpoints]);
+  }, [clientEndpoints, entitySlug, projectId, setEndpoints]);
 
   /**
    * Refresh endpoints from server
@@ -114,9 +117,9 @@ export const useEndpointsManager = ({
       if (!token) {
         return;
       }
-      await clientRefresh(userId, projectId, token, queryParams ?? params);
+      await clientRefresh(entitySlug, projectId, token, queryParams ?? params);
     },
-    [clientRefresh, userId, projectId, token, params]
+    [clientRefresh, entitySlug, projectId, token, params]
   );
 
   /**
@@ -128,16 +131,16 @@ export const useEndpointsManager = ({
         return;
       }
       const response = await clientCreateEndpoint(
-        userId,
+        entitySlug,
         projectId,
         data,
         token
       );
       if (response.success && response.data) {
-        addEndpoint(userId, projectId, response.data);
+        addEndpoint(entitySlug, projectId, response.data);
       }
     },
-    [clientCreateEndpoint, userId, projectId, token, addEndpoint]
+    [clientCreateEndpoint, entitySlug, projectId, token, addEndpoint]
   );
 
   /**
@@ -152,19 +155,19 @@ export const useEndpointsManager = ({
         return false;
       }
       const response = await clientUpdateEndpoint(
-        userId,
+        entitySlug,
         projectId,
         endpointId,
         data,
         token
       );
       if (response.success && response.data) {
-        updateEndpointInStore(userId, projectId, endpointId, response.data);
+        updateEndpointInStore(entitySlug, projectId, endpointId, response.data);
         return true;
       }
       return false;
     },
-    [clientUpdateEndpoint, userId, projectId, token, updateEndpointInStore]
+    [clientUpdateEndpoint, entitySlug, projectId, token, updateEndpointInStore]
   );
 
   /**
@@ -176,16 +179,16 @@ export const useEndpointsManager = ({
         return;
       }
       const response = await clientDeleteEndpoint(
-        userId,
+        entitySlug,
         projectId,
         endpointId,
         token
       );
       if (response.success) {
-        removeEndpoint(userId, projectId, endpointId);
+        removeEndpoint(entitySlug, projectId, endpointId);
       }
     },
-    [clientDeleteEndpoint, userId, projectId, token, removeEndpoint]
+    [clientDeleteEndpoint, entitySlug, projectId, token, removeEndpoint]
   );
 
   // Track if we've already attempted auto-fetch to prevent retry loops
