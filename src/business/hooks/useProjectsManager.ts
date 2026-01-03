@@ -5,12 +5,14 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
+  GetApiKeyResponse,
   NetworkClient,
   Optional,
   Project,
   ProjectCreateRequest,
   ProjectQueryParams,
   ProjectUpdateRequest,
+  RefreshApiKeyResponse,
 } from '@sudobility/shapeshyft_types';
 import {
   type FirebaseIdToken,
@@ -49,6 +51,8 @@ export interface UseProjectsManagerReturn {
     data: ProjectUpdateRequest
   ) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
+  getProjectApiKey: (projectId: string) => Promise<GetApiKeyResponse | null>;
+  refreshProjectApiKey: (projectId: string) => Promise<RefreshApiKeyResponse | null>;
   clearError: () => void;
 }
 
@@ -71,6 +75,8 @@ export const useProjectsManager = ({
     createProject: clientCreateProject,
     updateProject: clientUpdateProject,
     deleteProject: clientDeleteProject,
+    getProjectApiKey: clientGetProjectApiKey,
+    refreshProjectApiKey: clientRefreshProjectApiKey,
     clearError,
   } = useProjects(networkClient, baseUrl);
   const cacheEntry = useProjectsStore(
@@ -168,6 +174,42 @@ export const useProjectsManager = ({
     [clientDeleteProject, entitySlug, token, removeProject]
   );
 
+  /**
+   * Get project API key (full key)
+   */
+  const getProjectApiKey = useCallback(
+    async (projectId: string): Promise<GetApiKeyResponse | null> => {
+      if (!token) {
+        return null;
+      }
+      const response = await clientGetProjectApiKey(entitySlug, projectId, token);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return null;
+    },
+    [clientGetProjectApiKey, entitySlug, token]
+  );
+
+  /**
+   * Refresh project API key (generates new key)
+   */
+  const refreshProjectApiKey = useCallback(
+    async (projectId: string): Promise<RefreshApiKeyResponse | null> => {
+      if (!token) {
+        return null;
+      }
+      const response = await clientRefreshProjectApiKey(entitySlug, projectId, token);
+      if (response.success && response.data) {
+        // Refresh the projects list to get updated api_key_prefix
+        await refresh();
+        return response.data;
+      }
+      return null;
+    },
+    [clientRefreshProjectApiKey, entitySlug, token, refresh]
+  );
+
   // Track if we've already attempted auto-fetch to prevent retry loops
   const hasAttemptedFetchRef = useRef(false);
 
@@ -200,6 +242,8 @@ export const useProjectsManager = ({
       createProject,
       updateProject,
       deleteProject,
+      getProjectApiKey,
+      refreshProjectApiKey,
       clearError,
     }),
     [
@@ -213,6 +257,8 @@ export const useProjectsManager = ({
       createProject,
       updateProject,
       deleteProject,
+      getProjectApiKey,
+      refreshProjectApiKey,
     ]
   );
 };
