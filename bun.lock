@@ -8,8 +8,8 @@
       },
       "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@sudobility/shapeshyft_client": "^0.0.9",
-        "@sudobility/shapeshyft_types": "^1.0.12",
+        "@sudobility/shapeshyft_client": "^0.0.10",
+        "@sudobility/shapeshyft_types": "^1.0.13",
         "@sudobility/types": "^1.9.40",
         "@tanstack/react-query": "^5.90.5",
         "@types/node": "^24.9.1",
@@ -26,8 +26,8 @@
         "vitest": "^4.0.4",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.9",
-        "@sudobility/shapeshyft_types": "^1.0.12",
+        "@sudobility/shapeshyft_client": "^0.0.10",
+        "@sudobility/shapeshyft_types": "^1.0.13",
         "@sudobility/types": "^1.9.40",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -203,9 +203,9 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.9", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.12", "@sudobility/types": "^1.9.40", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-uW7GL4+hmqI6XhFF69yNkD3jOmrjA/uXuql4Q6jzLqkDunzweaM4NrFxKJVQt+iEXo0BKce4lI7oqVVosrXdaQ=="],
+    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.10", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.13", "@sudobility/types": "^1.9.40", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-gZTbkEp1vESu74+uMJHjG54W/3CSL/7JeBrg9y1NbS1ctnhpNO7D5tsl715D/BZC0kITmYie8su2nUHzWAoCLA=="],
 
-    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.12", "", { "peerDependencies": { "@sudobility/types": "^1.9.40" } }, "sha512-KctfMWlkL9ZersH6QBmy68zeqlUNA2Id6Lp3iAc0zyoEiCWZ0F8g8ntnNjasUPaoXCyH291YzaasauSDuppeZQ=="],
+    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.13", "", { "peerDependencies": { "@sudobility/types": "^1.9.40" } }, "sha512-P8H8onU8BvJ1bieEH70infpajkcKccqLOzZh49xqMPURvXXjlLLf0RX6VWbsc0A2kCkoFZZb7FIN8SZgsBOxfg=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.40", "", {}, "sha512-OxG5KxSee+GnuFHTUj8kCI2ARpuTKec1MRiGqOFut6T2MSiv1YcA+Sfg+n+eh+mTMKi+VkjNRZi1hkrFePBkWQ=="],
 
