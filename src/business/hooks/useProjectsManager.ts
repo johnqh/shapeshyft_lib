@@ -52,7 +52,9 @@ export interface UseProjectsManagerReturn {
   ) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
   getProjectApiKey: (projectId: string) => Promise<GetApiKeyResponse | null>;
-  refreshProjectApiKey: (projectId: string) => Promise<RefreshApiKeyResponse | null>;
+  refreshProjectApiKey: (
+    projectId: string
+  ) => Promise<RefreshApiKeyResponse | null>;
   clearError: () => void;
 }
 
@@ -182,7 +184,11 @@ export const useProjectsManager = ({
       if (!token) {
         return null;
       }
-      const response = await clientGetProjectApiKey(entitySlug, projectId, token);
+      const response = await clientGetProjectApiKey(
+        entitySlug,
+        projectId,
+        token
+      );
       if (response.success && response.data) {
         return response.data;
       }
@@ -199,7 +205,11 @@ export const useProjectsManager = ({
       if (!token) {
         return null;
       }
-      const response = await clientRefreshProjectApiKey(entitySlug, projectId, token);
+      const response = await clientRefreshProjectApiKey(
+        entitySlug,
+        projectId,
+        token
+      );
       if (response.success && response.data) {
         // Refresh the projects list to get updated api_key_prefix
         await refresh();
