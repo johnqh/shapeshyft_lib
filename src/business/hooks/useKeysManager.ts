@@ -22,6 +22,8 @@ export interface UseKeysManagerConfig {
   networkClient: NetworkClient;
   entitySlug: string;
   token: Optional<FirebaseIdToken>;
+  /** Testnet/sandbox mode */
+  testMode?: boolean;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
 }
@@ -51,6 +53,7 @@ export const useKeysManager = ({
   networkClient,
   entitySlug,
   token,
+  testMode = false,
   autoFetch = true,
 }: UseKeysManagerConfig): UseKeysManagerReturn => {
   const {
@@ -62,7 +65,7 @@ export const useKeysManager = ({
     updateKey: clientUpdateKey,
     deleteKey: clientDeleteKey,
     clearError,
-  } = useKeys(networkClient, baseUrl);
+  } = useKeys(networkClient, baseUrl, testMode);
   const cacheEntry = useKeysStore(
     useCallback(state => state.cache[entitySlug], [entitySlug])
   );

@@ -28,6 +28,8 @@ export interface UseProjectsManagerConfig {
   networkClient: NetworkClient;
   entitySlug: string;
   token: Optional<FirebaseIdToken>;
+  /** Testnet/sandbox mode */
+  testMode?: boolean;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
   /** Query params for filtering */
@@ -66,6 +68,7 @@ export const useProjectsManager = ({
   networkClient,
   entitySlug,
   token,
+  testMode = false,
   autoFetch = true,
   params,
 }: UseProjectsManagerConfig): UseProjectsManagerReturn => {
@@ -80,7 +83,7 @@ export const useProjectsManager = ({
     getProjectApiKey: clientGetProjectApiKey,
     refreshProjectApiKey: clientRefreshProjectApiKey,
     clearError,
-  } = useProjects(networkClient, baseUrl);
+  } = useProjects(networkClient, baseUrl, testMode);
   const cacheEntry = useProjectsStore(
     useCallback(state => state.cache[entitySlug], [entitySlug])
   );

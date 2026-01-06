@@ -27,6 +27,8 @@ export interface UseEndpointsManagerConfig {
   entitySlug: string;
   projectId: string;
   token: Optional<FirebaseIdToken>;
+  /** Testnet/sandbox mode */
+  testMode?: boolean;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
   /** Query params for filtering */
@@ -62,6 +64,7 @@ export const useEndpointsManager = ({
   entitySlug,
   projectId,
   token,
+  testMode = false,
   autoFetch = true,
   params,
 }: UseEndpointsManagerConfig): UseEndpointsManagerReturn => {
@@ -74,7 +77,7 @@ export const useEndpointsManager = ({
     updateEndpoint: clientUpdateEndpoint,
     deleteEndpoint: clientDeleteEndpoint,
     clearError,
-  } = useEndpoints(networkClient, baseUrl);
+  } = useEndpoints(networkClient, baseUrl, testMode);
   const cacheKey = useMemo(
     () => `${entitySlug}:${projectId}`,
     [entitySlug, projectId]

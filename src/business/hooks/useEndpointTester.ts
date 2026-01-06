@@ -239,9 +239,10 @@ function validateValue(
  */
 export const useEndpointTester = (
   networkClient: NetworkClient,
-  baseUrl: string
+  baseUrl: string,
+  testMode: boolean = false
 ): UseEndpointTesterReturn => {
-  const aiExecute = useAiExecute(networkClient, baseUrl);
+  const aiExecute = useAiExecute(networkClient, baseUrl, testMode);
 
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);

@@ -24,6 +24,8 @@ export interface UseAnalyticsManagerConfig {
   networkClient: NetworkClient;
   userId: string;
   token: Optional<FirebaseIdToken>;
+  /** Testnet/sandbox mode */
+  testMode?: boolean;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
   /** Query params for filtering */
@@ -52,6 +54,7 @@ export const useAnalyticsManager = ({
   networkClient,
   userId,
   token,
+  testMode = false,
   autoFetch = true,
   params,
 }: UseAnalyticsManagerConfig): UseAnalyticsManagerReturn => {
@@ -61,7 +64,7 @@ export const useAnalyticsManager = ({
     error,
     refresh: clientRefresh,
     clearError,
-  } = useAnalytics(networkClient, baseUrl);
+  } = useAnalytics(networkClient, baseUrl, testMode);
   const cacheEntry = useAnalyticsStore(
     useCallback(state => state.cache[userId], [userId])
   );

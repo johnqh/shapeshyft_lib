@@ -24,6 +24,8 @@ export interface UseSettingsManagerConfig {
   networkClient: NetworkClient;
   userId: string;
   token: Optional<FirebaseIdToken>;
+  /** Testnet/sandbox mode */
+  testMode?: boolean;
   /** Auto-fetch on mount when token is available */
   autoFetch?: boolean;
 }
@@ -51,6 +53,7 @@ export const useSettingsManager = ({
   networkClient,
   userId,
   token,
+  testMode = false,
   autoFetch = true,
 }: UseSettingsManagerConfig): UseSettingsManagerReturn => {
   const {
@@ -60,7 +63,7 @@ export const useSettingsManager = ({
     refresh: clientRefresh,
     updateSettings: clientUpdateSettings,
     clearError,
-  } = useSettings(networkClient, baseUrl);
+  } = useSettings(networkClient, baseUrl, testMode);
 
   const cacheEntry = useSettingsStore(
     useCallback(state => state.cache[userId], [userId])
