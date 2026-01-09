@@ -8,9 +8,9 @@
       },
       "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@sudobility/shapeshyft_client": "^0.0.17",
-        "@sudobility/shapeshyft_types": "^1.0.14",
-        "@sudobility/types": "^1.9.41",
+        "@sudobility/shapeshyft_client": "^0.0.18",
+        "@sudobility/shapeshyft_types": "^1.0.15",
+        "@sudobility/types": "^1.9.42",
         "@tanstack/react-query": "^5.90.5",
         "@types/node": "^24.9.1",
         "@types/react": "^19.2.2",
@@ -26,9 +26,9 @@
         "vitest": "^4.0.4",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.17",
-        "@sudobility/shapeshyft_types": "^1.0.14",
-        "@sudobility/types": "^1.9.41",
+        "@sudobility/shapeshyft_client": "^0.0.18",
+        "@sudobility/shapeshyft_types": "^1.0.15",
+        "@sudobility/types": "^1.9.42",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
       },
@@ -203,11 +203,11 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.17", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.14", "@sudobility/types": "^1.9.41", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-VV6+tmNAYeA9PeDB392Vs+Fzue6kginZzG6rExwfkg4U0nu1fUD9JdI8e4AG+ylmqlBZANzcrS7ESZAzYezt3g=="],
+    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.18", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.15", "@sudobility/types": "^1.9.42", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-gydN9hqkSWEdk8euqDfQyqvWl2bQoIoDlMqTgGqgBv1HFh847AnTaVuH1pX2jog0VAorsxid56x/3/slJ3w//A=="],
 
-    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.14", "", { "peerDependencies": { "@sudobility/types": "^1.9.41" } }, "sha512-0lfSQNfFgBr18OJ8xNw3fb6B1v78pFAr7Burb4jUs6ekEXjlnevB6JqQhaPWNxnfK2WRDQw/J43mXtq+TMRTBg=="],
+    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.15", "", { "peerDependencies": { "@sudobility/types": "^1.9.42" } }, "sha512-pLND8skvpSp+8gzpNlwMdv5wAIE3VshrUjFDg0bq4I/C1G4Jlm3zEgxL5Kw1ld1rIpZDNGy+NBtqCtoNQNBO5Q=="],
 
-    "@sudobility/types": ["@sudobility/types@1.9.41", "", {}, "sha512-W2RuqIhCdhvNaNMiThT8zAZ8YcIbgPceb85Jh+UeGMG66fEn63fvdOSDKil72i/DySAWeab0yhse1Yl5lYDbnA=="],
+    "@sudobility/types": ["@sudobility/types@1.9.42", "", {}, "sha512-FSCgCRLY+BVwKNHtjx5jvc/6tNDh2wn5mSx3TNWlCVMpjsYUjR4ekm9JM/WxhzEXHP9g5H0jD12WQPy0rQg/RQ=="],
 
     "@tanstack/query-core": ["@tanstack/query-core@5.90.12", "", {}, "sha512-T1/8t5DhV/SisWjDnaiU2drl6ySvsHj1bHBCWNXd+/T+Hh1cf6JodyEYMd5sgwm+b/mETT4EV3H+zCVczCU5hg=="],
 
