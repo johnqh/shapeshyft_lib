@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/shapeshyft_lib",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "Business logic library for ShapeShyft with Zustand stores",
   "type": "module",
   "main": "dist/index.js",
@@ -16,8 +16,8 @@
     "build:watch": "bunx tsc --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "bun run clean && bun run build",
-    "test": "bunx vitest",
-    "test:run": "bunx vitest run",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "bunx eslint src --ext .ts,.tsx",
     "lint:fix": "bunx eslint src --ext .ts,.tsx --fix",
     "format": "bunx prettier --write src/**/*.ts",
@@ -39,7 +39,7 @@
   },
   "peerDependencies": {
     "@sudobility/shapeshyft_client": "^0.0.20",
-    "@sudobility/shapeshyft_types": "^1.0.17",
+    "@sudobility/shapeshyft_types": "^1.0.19",
     "@sudobility/types": "^1.9.43",
     "@tanstack/react-query": ">=5.0.0",
     "react": ">=18.0.0"
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@sudobility/shapeshyft_client": "^0.0.20",
-    "@sudobility/shapeshyft_types": "^1.0.17",
+    "@sudobility/shapeshyft_types": "^1.0.19",
     "@sudobility/types": "^1.9.43",
     "@tanstack/react-query": "^5.90.5",
     "@types/node": "^24.9.1",
