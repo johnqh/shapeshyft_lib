@@ -6,6 +6,9 @@ export {
   dataExtractorTemplate,
   contentGeneratorTemplate,
   localizationTemplate,
+  imageRecognitionTemplate,
+  imageGenerationTemplate,
+  imageProcessingTemplate,
   ALL_TEMPLATES,
   applyTemplate,
 } from './endpoint-templates';

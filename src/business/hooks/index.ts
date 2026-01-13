@@ -49,3 +49,9 @@ export {
   type BudgetAlert,
   type CostBreakdownItem,
 } from './useBudgetTracker';
+
+export {
+  useEndpointTemplates,
+  type UseEndpointTemplatesReturn,
+  type EndpointTemplateWithCategory,
+} from './useEndpointTemplates';
