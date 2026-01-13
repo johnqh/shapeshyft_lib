@@ -457,6 +457,286 @@ export const localizationTemplate: ProjectTemplate = {
 };
 
 /**
+ * Image recognition template (image → text)
+ */
+export const imageRecognitionTemplate: ProjectTemplate = {
+  id: 'image-recognition',
+  name: 'Image Recognition',
+  description: 'Analyze and describe images using vision models',
+  category: 'Vision',
+  endpoints: [
+    {
+      endpoint_name: 'analyze-image',
+      display_name: 'Analyze Image',
+      input_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The image to analyze',
+          },
+          analysis_type: {
+            type: 'string',
+            enum: ['description', 'objects', 'text_extraction', 'detailed'],
+            description: 'Type of analysis to perform',
+          },
+          language: {
+            type: 'string',
+            description: 'Language for the response (default: English)',
+          },
+        },
+        required: ['image'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          description: {
+            type: 'string',
+            description: 'Natural language description of the image',
+          },
+          objects: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                confidence: { type: 'number', minimum: 0, maximum: 1 },
+                location: { type: 'string' },
+              },
+              required: ['name'],
+            },
+            description: 'Detected objects in the image',
+          },
+          extracted_text: {
+            type: 'string',
+            description: 'Text extracted from the image (OCR)',
+          },
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Relevant tags for the image',
+          },
+        },
+        required: ['description'],
+      },
+      instructions:
+        'Analyze the provided image and return a detailed description. If analysis_type is specified, focus on that aspect. For "objects", list all detectable objects. For "text_extraction", extract any visible text. For "detailed", provide comprehensive analysis including colors, composition, and context.',
+    },
+    {
+      endpoint_name: 'classify-image',
+      display_name: 'Classify Image',
+      input_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The image to classify',
+          },
+          categories: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'List of possible categories',
+          },
+        },
+        required: ['image', 'categories'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          category: {
+            type: 'string',
+            description: 'The classified category',
+          },
+          confidence: {
+            type: 'number',
+            minimum: 0,
+            maximum: 1,
+            description: 'Confidence score (0-1)',
+          },
+          reasoning: {
+            type: 'string',
+            description: 'Brief explanation of the classification',
+          },
+        },
+        required: ['category', 'confidence'],
+      },
+      instructions:
+        'Classify the input image into one of the provided categories. Analyze the visual content and return the most appropriate category with a confidence score and reasoning.',
+    },
+  ],
+};
+
+/**
+ * Image generation template (text → image)
+ */
+export const imageGenerationTemplate: ProjectTemplate = {
+  id: 'image-generation',
+  name: 'Image Generation',
+  description: 'Generate images from text descriptions',
+  category: 'Generation',
+  endpoints: [
+    {
+      endpoint_name: 'generate-image',
+      display_name: 'Generate Image',
+      input_schema: {
+        type: 'object',
+        properties: {
+          prompt: {
+            type: 'string',
+            description: 'Detailed description of the image to generate',
+          },
+          style: {
+            type: 'string',
+            enum: [
+              'realistic',
+              'artistic',
+              'cartoon',
+              'sketch',
+              'abstract',
+              'minimalist',
+            ],
+            description: 'Visual style for the generated image',
+          },
+          aspect_ratio: {
+            type: 'string',
+            enum: ['1:1', '16:9', '9:16', '4:3', '3:4'],
+            description: 'Aspect ratio of the generated image',
+          },
+          negative_prompt: {
+            type: 'string',
+            description: 'Elements to avoid in the generated image',
+          },
+        },
+        required: ['prompt'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The generated image',
+          },
+          revised_prompt: {
+            type: 'string',
+            description: 'The prompt as interpreted by the model',
+          },
+        },
+        required: ['image'],
+      },
+      instructions:
+        'Generate an image based on the provided text description. Apply the specified style if provided. Avoid elements mentioned in negative_prompt. Ensure the generated image matches the requested aspect ratio.',
+    },
+  ],
+};
+
+/**
+ * Image processing template (image → image)
+ */
+export const imageProcessingTemplate: ProjectTemplate = {
+  id: 'image-processing',
+  name: 'Image Processing',
+  description: 'Transform and edit images using AI',
+  category: 'Processing',
+  endpoints: [
+    {
+      endpoint_name: 'edit-image',
+      display_name: 'Edit Image',
+      input_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The source image to edit',
+          },
+          edit_instruction: {
+            type: 'string',
+            description:
+              'Natural language instruction for how to edit the image',
+          },
+          mask: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description:
+              'Optional mask indicating area to edit (white = edit, black = preserve)',
+          },
+        },
+        required: ['image', 'edit_instruction'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The edited image',
+          },
+          changes_made: {
+            type: 'string',
+            description: 'Description of changes applied to the image',
+          },
+        },
+        required: ['image'],
+      },
+      instructions:
+        'Apply the requested edit to the provided image. If a mask is provided, only modify the white areas of the mask. Preserve the original style and quality of the image where possible.',
+    },
+    {
+      endpoint_name: 'transform-style',
+      display_name: 'Transform Style',
+      input_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The source image to transform',
+          },
+          target_style: {
+            type: 'string',
+            description:
+              'Description of the target style (e.g., "oil painting", "anime", "watercolor")',
+          },
+          preserve_content: {
+            type: 'boolean',
+            description: 'Whether to preserve the original content/composition',
+          },
+        },
+        required: ['image', 'target_style'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          image: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'image/*',
+            description: 'The style-transformed image',
+          },
+          original_style: {
+            type: 'string',
+            description: 'Description of the original image style',
+          },
+        },
+        required: ['image'],
+      },
+      instructions:
+        'Transform the visual style of the image to match the target_style description. If preserve_content is true, maintain the original composition and subjects while changing only the artistic style.',
+    },
+  ],
+};
+
+/**
  * All available templates
  */
 export const ALL_TEMPLATES: ProjectTemplate[] = [
@@ -465,6 +745,9 @@ export const ALL_TEMPLATES: ProjectTemplate[] = [
   dataExtractorTemplate,
   contentGeneratorTemplate,
   localizationTemplate,
+  imageRecognitionTemplate,
+  imageGenerationTemplate,
+  imageProcessingTemplate,
 ];
 
 /**

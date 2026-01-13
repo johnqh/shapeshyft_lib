@@ -5,6 +5,9 @@ import {
   dataExtractorTemplate,
   contentGeneratorTemplate,
   localizationTemplate,
+  imageRecognitionTemplate,
+  imageGenerationTemplate,
+  imageProcessingTemplate,
   ALL_TEMPLATES,
   applyTemplate,
   type ProjectTemplate,
@@ -12,8 +15,8 @@ import {
 
 describe('endpoint-templates', () => {
   describe('template definitions', () => {
-    it('should export all 5 templates', () => {
-      expect(ALL_TEMPLATES).toHaveLength(5);
+    it('should export all 8 templates', () => {
+      expect(ALL_TEMPLATES).toHaveLength(8);
     });
 
     it('should have unique template ids', () => {
@@ -110,6 +113,77 @@ describe('endpoint-templates', () => {
         );
         expect(endpointNames).toContain('translate-batch');
         expect(endpointNames).toContain('translate-single');
+      });
+    });
+
+    describe('imageRecognitionTemplate', () => {
+      it('should have correct structure', () => {
+        expect(imageRecognitionTemplate.id).toBe('image-recognition');
+        expect(imageRecognitionTemplate.name).toBe('Image Recognition');
+        expect(imageRecognitionTemplate.category).toBe('Vision');
+        expect(imageRecognitionTemplate.endpoints).toHaveLength(2);
+      });
+
+      it('should have image analysis endpoints with media input', () => {
+        const endpointNames = imageRecognitionTemplate.endpoints.map(
+          e => e.endpoint_name
+        );
+        expect(endpointNames).toContain('analyze-image');
+        expect(endpointNames).toContain('classify-image');
+
+        // Verify image input field has correct media type format
+        const analyzeEndpoint = imageRecognitionTemplate.endpoints[0];
+        expect(analyzeEndpoint.input_schema.properties?.image?.format).toBe(
+          'binary'
+        );
+        expect(
+          analyzeEndpoint.input_schema.properties?.image?.contentMediaType
+        ).toBe('image/*');
+      });
+    });
+
+    describe('imageGenerationTemplate', () => {
+      it('should have correct structure', () => {
+        expect(imageGenerationTemplate.id).toBe('image-generation');
+        expect(imageGenerationTemplate.name).toBe('Image Generation');
+        expect(imageGenerationTemplate.category).toBe('Generation');
+        expect(imageGenerationTemplate.endpoints).toHaveLength(1);
+      });
+
+      it('should have generate endpoint with media output', () => {
+        const endpoint = imageGenerationTemplate.endpoints[0];
+        expect(endpoint.endpoint_name).toBe('generate-image');
+        expect(endpoint.input_schema.properties).toHaveProperty('prompt');
+        expect(endpoint.output_schema.properties?.image?.format).toBe('binary');
+        expect(
+          endpoint.output_schema.properties?.image?.contentMediaType
+        ).toBe('image/*');
+      });
+    });
+
+    describe('imageProcessingTemplate', () => {
+      it('should have correct structure', () => {
+        expect(imageProcessingTemplate.id).toBe('image-processing');
+        expect(imageProcessingTemplate.name).toBe('Image Processing');
+        expect(imageProcessingTemplate.category).toBe('Processing');
+        expect(imageProcessingTemplate.endpoints).toHaveLength(2);
+      });
+
+      it('should have edit and transform endpoints with media input/output', () => {
+        const endpointNames = imageProcessingTemplate.endpoints.map(
+          e => e.endpoint_name
+        );
+        expect(endpointNames).toContain('edit-image');
+        expect(endpointNames).toContain('transform-style');
+
+        // Verify both input and output are images
+        const editEndpoint = imageProcessingTemplate.endpoints[0];
+        expect(editEndpoint.input_schema.properties?.image?.format).toBe(
+          'binary'
+        );
+        expect(editEndpoint.output_schema.properties?.image?.format).toBe(
+          'binary'
+        );
       });
     });
   });
