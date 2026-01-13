@@ -46,7 +46,7 @@ export interface UseEndpointsManagerReturn {
   cachedAt: Optional<number>;
 
   refresh: (params?: EndpointQueryParams) => Promise<void>;
-  createEndpoint: (data: EndpointCreateRequest) => Promise<void>;
+  createEndpoint: (data: EndpointCreateRequest) => Promise<Endpoint | null>;
   updateEndpoint: (
     endpointId: string,
     data: EndpointUpdateRequest
@@ -129,9 +129,9 @@ export const useEndpointsManager = ({
    * Create a new endpoint
    */
   const createEndpoint = useCallback(
-    async (data: EndpointCreateRequest): Promise<void> => {
+    async (data: EndpointCreateRequest): Promise<Endpoint | null> => {
       if (!token) {
-        return;
+        return null;
       }
       const response = await clientCreateEndpoint(
         entitySlug,
@@ -141,7 +141,9 @@ export const useEndpointsManager = ({
       );
       if (response.success && response.data) {
         addEndpoint(entitySlug, projectId, response.data);
+        return response.data;
       }
+      return null;
     },
     [clientCreateEndpoint, entitySlug, projectId, token, addEndpoint]
   );
