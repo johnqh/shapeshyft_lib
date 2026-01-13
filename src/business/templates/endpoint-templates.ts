@@ -489,6 +489,7 @@ export function applyTemplate(
     display_name: ep.display_name,
     http_method: 'POST',
     llm_key_id: llmKeyId,
+    model: null,
     input_schema: ep.input_schema,
     output_schema: ep.output_schema,
     instructions: ep.instructions,
