@@ -1,9 +1,10 @@
 /**
  * Provider Models Manager Hook
  * Business logic hook that wraps the client useProviderModels hook with capability filtering
+ * and Zustand caching for local storage persistence
  */
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   LlmProvider,
   ModelCapabilities,
@@ -13,6 +14,7 @@ import type {
   RequiredCapabilities,
 } from '@sudobility/shapeshyft_types';
 import { useProviderModels } from '@sudobility/shapeshyft_client';
+import { useProviderModelsStore, DEFAULT_CACHE_MAX_AGE_MS } from '../stores/providerModelsStore';
 
 // Stable empty array to prevent unnecessary re-renders
 const EMPTY_MODELS: ModelInfo[] = [];
@@ -31,6 +33,8 @@ export interface UseProviderModelsManagerConfig {
   requiredCapabilities?: RequiredCapabilities;
   /** Testnet/sandbox mode */
   testMode?: boolean;
+  /** Cache max age in milliseconds (default: 1 hour) */
+  cacheMaxAgeMs?: number;
 }
 
 /**
@@ -53,6 +57,10 @@ export interface UseProviderModelsManagerReturn {
   allowsCustomModel: boolean;
   /** Default model for this provider */
   defaultModel: string | null;
+  /** Whether the data is from cache */
+  isCached: boolean;
+  /** Timestamp when the data was cached */
+  cachedAt: number | null;
 }
 
 /**
@@ -82,15 +90,16 @@ function filterModelsByCapabilities(
 }
 
 /**
- * Manager hook for provider models with capability filtering
+ * Manager hook for provider models with capability filtering and local storage caching
  *
  * This hook wraps the client useProviderModels hook and adds:
  * - Capability-based filtering based on template requirements
+ * - Zustand-based local storage caching
  * - Convenience properties for provider configuration
  *
  * @example
  * ```tsx
- * const { models, isLoading, allowsCustomModel } = useProviderModelsManager({
+ * const { models, isLoading, allowsCustomModel, isCached } = useProviderModelsManager({
  *   networkClient,
  *   baseUrl,
  *   provider: 'openai',
@@ -104,15 +113,51 @@ export const useProviderModelsManager = ({
   provider,
   requiredCapabilities = {},
   testMode = false,
+  cacheMaxAgeMs = DEFAULT_CACHE_MAX_AGE_MS,
 }: UseProviderModelsManagerConfig): UseProviderModelsManagerReturn => {
+  // Get store methods
+  const cacheEntry = useProviderModelsStore(
+    useCallback(state => (provider ? state.cache[provider] : undefined), [provider])
+  );
+  const setProviderModels = useProviderModelsStore(state => state.setProviderModels);
+  const isStale = useProviderModelsStore(state => state.isStale);
+
+  // Check if we have valid cached data
+  const hasFreshCache = provider ? !isStale(provider, cacheMaxAgeMs) : false;
+
   // Use the client hook to fetch models
   const {
-    provider: providerConfig,
-    models: allModels,
-    isLoading,
+    provider: clientProviderConfig,
+    models: clientModels,
+    isLoading: clientIsLoading,
     error,
     refetch,
   } = useProviderModels(networkClient, baseUrl, provider, testMode);
+
+  // Sync client data to store when it changes
+  useEffect(() => {
+    if (provider && clientProviderConfig && clientModels.length > 0) {
+      setProviderModels(provider, clientProviderConfig, clientModels);
+    }
+  }, [provider, clientProviderConfig, clientModels, setProviderModels]);
+
+  // Determine data source - prefer fresh client data, fall back to cache
+  const providerConfig = useMemo(() => {
+    if (clientProviderConfig) return clientProviderConfig;
+    return cacheEntry?.providerConfig ?? null;
+  }, [clientProviderConfig, cacheEntry?.providerConfig]);
+
+  const allModels = useMemo(() => {
+    if (clientModels.length > 0) return clientModels;
+    return cacheEntry?.models ?? EMPTY_MODELS;
+  }, [clientModels, cacheEntry?.models]);
+
+  // Determine if we're showing cached data
+  const isCached = clientModels.length === 0 && (cacheEntry?.models?.length ?? 0) > 0;
+  const cachedAt = cacheEntry?.cachedAt ?? null;
+
+  // Only show loading if we don't have cached data
+  const isLoading = clientIsLoading && !hasFreshCache;
 
   // Filter models by required capabilities
   const filteredModels = useMemo(() => {
@@ -136,6 +181,8 @@ export const useProviderModelsManager = ({
       refetch,
       allowsCustomModel,
       defaultModel,
+      isCached,
+      cachedAt,
     }),
     [
       providerConfig,
@@ -146,6 +193,8 @@ export const useProviderModelsManager = ({
       refetch,
       allowsCustomModel,
       defaultModel,
+      isCached,
+      cachedAt,
     ]
   );
 };
