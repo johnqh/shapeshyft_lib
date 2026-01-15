@@ -5,7 +5,11 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { LlmProvider, ModelInfo, ProviderConfig } from '@sudobility/shapeshyft_types';
+import type {
+  LlmProvider,
+  ModelInfo,
+  ProviderConfig,
+} from '@sudobility/shapeshyft_types';
 
 /**
  * Provider models cache entry
@@ -32,7 +36,9 @@ interface ProviderModelsStoreState {
     models: ModelInfo[]
   ) => void;
   /** Get provider data for a specific provider */
-  getProviderModels: (provider: LlmProvider) => ProviderModelsCacheEntry | undefined;
+  getProviderModels: (
+    provider: LlmProvider
+  ) => ProviderModelsCacheEntry | undefined;
   /** Clear cache for a specific provider */
   clearProvider: (provider: LlmProvider) => void;
   /** Clear all cached provider data */

@@ -14,7 +14,10 @@ import type {
   RequiredCapabilities,
 } from '@sudobility/shapeshyft_types';
 import { useProviderModels } from '@sudobility/shapeshyft_client';
-import { useProviderModelsStore, DEFAULT_CACHE_MAX_AGE_MS } from '../stores/providerModelsStore';
+import {
+  DEFAULT_CACHE_MAX_AGE_MS,
+  useProviderModelsStore,
+} from '../stores/providerModelsStore';
 
 // Stable empty array to prevent unnecessary re-renders
 const EMPTY_MODELS: ModelInfo[] = [];
@@ -72,12 +75,14 @@ function filterModelsByCapabilities(
   required: RequiredCapabilities
 ): ModelInfo[] {
   // If no requirements, return all models
-  const requiredEntries = Object.entries(required).filter(([, value]) => value === true);
+  const requiredEntries = Object.entries(required).filter(
+    ([, value]) => value === true
+  );
   if (requiredEntries.length === 0) {
     return models;
   }
 
-  return models.filter((model) => {
+  return models.filter(model => {
     const caps = model.capabilities;
     for (const [key] of requiredEntries) {
       // Check if the model has this capability
@@ -117,9 +122,14 @@ export const useProviderModelsManager = ({
 }: UseProviderModelsManagerConfig): UseProviderModelsManagerReturn => {
   // Get store methods
   const cacheEntry = useProviderModelsStore(
-    useCallback(state => (provider ? state.cache[provider] : undefined), [provider])
+    useCallback(
+      state => (provider ? state.cache[provider] : undefined),
+      [provider]
+    )
   );
-  const setProviderModels = useProviderModelsStore(state => state.setProviderModels);
+  const setProviderModels = useProviderModelsStore(
+    state => state.setProviderModels
+  );
   const isStale = useProviderModelsStore(state => state.isStale);
 
   // Check if we have valid cached data
@@ -153,7 +163,8 @@ export const useProviderModelsManager = ({
   }, [clientModels, cacheEntry?.models]);
 
   // Determine if we're showing cached data
-  const isCached = clientModels.length === 0 && (cacheEntry?.models?.length ?? 0) > 0;
+  const isCached =
+    clientModels.length === 0 && (cacheEntry?.models?.length ?? 0) > 0;
   const cachedAt = cacheEntry?.cachedAt ?? null;
 
   // Only show loading if we don't have cached data
