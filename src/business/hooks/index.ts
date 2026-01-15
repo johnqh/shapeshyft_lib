@@ -55,3 +55,9 @@ export {
   type UseEndpointTemplatesReturn,
   type EndpointTemplateWithCategory,
 } from './useEndpointTemplates';
+
+export {
+  useProviderModelsManager,
+  type UseProviderModelsManagerConfig,
+  type UseProviderModelsManagerReturn,
+} from './useProviderModelsManager';
