@@ -8,8 +8,8 @@
       },
       "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@sudobility/shapeshyft_client": "^0.0.35",
-        "@sudobility/shapeshyft_types": "^1.0.31",
+        "@sudobility/shapeshyft_client": "^0.0.37",
+        "@sudobility/shapeshyft_types": "^1.0.32",
         "@sudobility/types": "^1.9.44",
         "@tanstack/react-query": "^5.90.5",
         "@types/node": "^24.9.1",
@@ -26,8 +26,8 @@
         "vitest": "^4.0.4",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.35",
-        "@sudobility/shapeshyft_types": "^1.0.31",
+        "@sudobility/shapeshyft_client": "^0.0.37",
+        "@sudobility/shapeshyft_types": "^1.0.32",
         "@sudobility/types": "^1.9.44",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -203,9 +203,9 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.35", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.30", "@sudobility/types": "^1.9.44", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-+xTxkcR7bqVa73wNPJTjnwuoBHITdyr4LG3/++6vNUvVi/EMsyZwzALbe6pbSG9/9D6XosTQoj3cP9BTEF+DgQ=="],
+    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.37", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.32", "@sudobility/types": "^1.9.44", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-J/nUvFXdOb+NAioqs9ESEPYfBvH5NKrKwVXg8NlkUhKUy3r/lt+Uf0eZqEdLhKUj0izsk8rNhe28kx8e8HwYYA=="],
 
-    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.31", "", { "peerDependencies": { "@sudobility/types": "^1.9.44" } }, "sha512-7a6Oyyja9SvmnYMKHY9nf6rm4YL/F8OHCN3Ms1/INkO6brgZwusbcyxhpSqqeW7bbJJKog+NdQ65NdUY2d0ZTg=="],
+    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.32", "", { "peerDependencies": { "@sudobility/types": "^1.9.44" } }, "sha512-Fgg7cO1k52bDtPWH68OEZ+lb9+Yr6Mz6kFmhKos8KfGZMXntt28MIlypC5DaEIEjdrgTW2Eew+j6FfmQ1o2B1g=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.44", "", {}, "sha512-2oRTD6sQ6Ouwyb4DAerU6FNCkGRaXnzPNwTg7puIzA3ZVTTauN6DzMLw0QzzUiwLHWlVpYZfldZK+IRYOz0LDA=="],
 
