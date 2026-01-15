@@ -17,6 +17,8 @@ export interface ProjectTemplate {
   description: string;
   category: string;
   endpoints: EndpointTemplate[];
+  /** If true, this template requires capabilities not yet implemented (V2 features) */
+  requiresV2?: boolean;
 }
 
 /**
@@ -572,12 +574,14 @@ export const imageRecognitionTemplate: ProjectTemplate = {
 
 /**
  * Image generation template (text → image)
+ * Note: Requires image generation models (Imagen, DALL-E) not yet supported in V1
  */
 export const imageGenerationTemplate: ProjectTemplate = {
   id: 'image-generation',
   name: 'Image Generation',
-  description: 'Generate images from text descriptions',
+  description: 'Generate images from text descriptions (Coming Soon)',
   category: 'Generation',
+  requiresV2: true,
   endpoints: [
     {
       endpoint_name: 'generate-image',
@@ -637,12 +641,14 @@ export const imageGenerationTemplate: ProjectTemplate = {
 
 /**
  * Image processing template (image → image)
+ * Note: Requires image editing models (DALL-E edit, Stable Diffusion) not yet supported in V1
  */
 export const imageProcessingTemplate: ProjectTemplate = {
   id: 'image-processing',
   name: 'Image Processing',
-  description: 'Transform and edit images using AI',
+  description: 'Transform and edit images using AI (Coming Soon)',
   category: 'Processing',
+  requiresV2: true,
   endpoints: [
     {
       endpoint_name: 'edit-image',
@@ -737,6 +743,106 @@ export const imageProcessingTemplate: ProjectTemplate = {
 };
 
 /**
+ * Audio transcription template (audio → text)
+ * Works with Whisper models via Groq provider
+ */
+export const audioTranscriptionTemplate: ProjectTemplate = {
+  id: 'audio-transcription',
+  name: 'Audio Transcription',
+  description: 'Transcribe audio to text with optional structured extraction',
+  category: 'Transcription',
+  endpoints: [
+    {
+      endpoint_name: 'transcribe',
+      display_name: 'Transcribe Audio',
+      input_schema: {
+        type: 'object',
+        properties: {
+          audio: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'audio/*',
+            description: 'The audio file to transcribe (mp3, wav, ogg, flac)',
+          },
+        },
+        required: ['audio'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          transcription: {
+            type: 'string',
+            description: 'The transcribed text from the audio',
+          },
+        },
+        required: ['transcription'],
+      },
+      instructions:
+        'Transcribe the audio content to text. Return the full transcription preserving natural speech patterns.',
+    },
+    {
+      endpoint_name: 'transcribe-meeting',
+      display_name: 'Transcribe Meeting',
+      input_schema: {
+        type: 'object',
+        properties: {
+          audio: {
+            type: 'string',
+            format: 'binary',
+            contentMediaType: 'audio/*',
+            description: 'The meeting audio to transcribe',
+          },
+          extract_action_items: {
+            type: 'boolean',
+            description: 'Whether to extract action items from the meeting',
+          },
+        },
+        required: ['audio'],
+      },
+      output_schema: {
+        type: 'object',
+        properties: {
+          transcription: {
+            type: 'string',
+            description: 'Full transcription of the meeting',
+          },
+          summary: {
+            type: 'string',
+            description: 'Brief summary of the meeting',
+          },
+          key_points: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Key points discussed in the meeting',
+          },
+          action_items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                task: { type: 'string' },
+                assignee: { type: 'string' },
+                deadline: { type: 'string' },
+              },
+              required: ['task'],
+            },
+            description: 'Action items extracted from the meeting',
+          },
+          participants: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Detected participants/speakers',
+          },
+        },
+        required: ['transcription', 'summary'],
+      },
+      instructions:
+        'Transcribe the meeting audio and extract structured information. Identify key discussion points, decisions made, and action items if requested. Try to identify different speakers when possible.',
+    },
+  ],
+};
+
+/**
  * All available templates
  */
 export const ALL_TEMPLATES: ProjectTemplate[] = [
@@ -746,6 +852,7 @@ export const ALL_TEMPLATES: ProjectTemplate[] = [
   contentGeneratorTemplate,
   localizationTemplate,
   imageRecognitionTemplate,
+  audioTranscriptionTemplate,
   imageGenerationTemplate,
   imageProcessingTemplate,
 ];

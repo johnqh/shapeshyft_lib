@@ -9,6 +9,7 @@ export {
   imageRecognitionTemplate,
   imageGenerationTemplate,
   imageProcessingTemplate,
+  audioTranscriptionTemplate,
   ALL_TEMPLATES,
   applyTemplate,
 } from './endpoint-templates';

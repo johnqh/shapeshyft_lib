@@ -6,6 +6,7 @@ import {
   contentGeneratorTemplate,
   localizationTemplate,
   imageRecognitionTemplate,
+  audioTranscriptionTemplate,
   imageGenerationTemplate,
   imageProcessingTemplate,
   ALL_TEMPLATES,
@@ -15,8 +16,8 @@ import {
 
 describe('endpoint-templates', () => {
   describe('template definitions', () => {
-    it('should export all 8 templates', () => {
-      expect(ALL_TEMPLATES).toHaveLength(8);
+    it('should export all 9 templates', () => {
+      expect(ALL_TEMPLATES).toHaveLength(9);
     });
 
     it('should have unique template ids', () => {
@@ -142,12 +143,52 @@ describe('endpoint-templates', () => {
       });
     });
 
+    describe('audioTranscriptionTemplate', () => {
+      it('should have correct structure', () => {
+        expect(audioTranscriptionTemplate.id).toBe('audio-transcription');
+        expect(audioTranscriptionTemplate.name).toBe('Audio Transcription');
+        expect(audioTranscriptionTemplate.category).toBe('Transcription');
+        expect(audioTranscriptionTemplate.endpoints).toHaveLength(2);
+      });
+
+      it('should have transcription endpoints with audio input', () => {
+        const endpointNames = audioTranscriptionTemplate.endpoints.map(
+          e => e.endpoint_name
+        );
+        expect(endpointNames).toContain('transcribe');
+        expect(endpointNames).toContain('transcribe-meeting');
+
+        // Verify audio input field has correct media type format
+        const transcribeEndpoint = audioTranscriptionTemplate.endpoints[0];
+        expect(transcribeEndpoint.input_schema.properties?.audio?.format).toBe(
+          'binary'
+        );
+        expect(
+          transcribeEndpoint.input_schema.properties?.audio?.contentMediaType
+        ).toBe('audio/*');
+      });
+
+      it('should have structured output for meeting transcription', () => {
+        const meetingEndpoint = audioTranscriptionTemplate.endpoints[1];
+        expect(meetingEndpoint.output_schema.properties).toHaveProperty(
+          'transcription'
+        );
+        expect(meetingEndpoint.output_schema.properties).toHaveProperty(
+          'summary'
+        );
+        expect(meetingEndpoint.output_schema.properties).toHaveProperty(
+          'action_items'
+        );
+      });
+    });
+
     describe('imageGenerationTemplate', () => {
       it('should have correct structure', () => {
         expect(imageGenerationTemplate.id).toBe('image-generation');
         expect(imageGenerationTemplate.name).toBe('Image Generation');
         expect(imageGenerationTemplate.category).toBe('Generation');
         expect(imageGenerationTemplate.endpoints).toHaveLength(1);
+        expect(imageGenerationTemplate.requiresV2).toBe(true);
       });
 
       it('should have generate endpoint with media output', () => {
