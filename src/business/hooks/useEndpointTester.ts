@@ -6,6 +6,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type {
   Endpoint,
+  GeneratedMedia,
   HttpMethod,
   JsonSchema,
   NetworkClient,
@@ -28,6 +29,8 @@ export interface TestResult {
   latencyMs: Optional<number>;
   tokensInput: Optional<number>;
   tokensOutput: Optional<number>;
+  /** Generated media from models like GPT-4o (audio), Imagen (images), Veo (video) */
+  generatedMedia: Optional<GeneratedMedia[]>;
 }
 
 /**
@@ -311,6 +314,7 @@ export const useEndpointTester = (
             latencyMs: null,
             tokensInput: null,
             tokensOutput: null,
+            generatedMedia: null,
           };
           setTestResults(prev => [result, ...prev]);
           return result;
@@ -328,25 +332,35 @@ export const useEndpointTester = (
 
         const latencyMs = Date.now() - startTime;
 
+        // Extract fields from response data
+        const responseData = response.success ? response.data : null;
+        const hasResponseData =
+          responseData && typeof responseData === 'object';
+
         const result: TestResult = {
           id: testId,
           endpointId: endpoint.uuid,
           endpointName: endpoint.endpoint_name,
           input: sampleInput,
-          output: response.success ? response.data : null,
+          output: responseData,
           success: response.success,
           error: response.error ?? null,
           timestamp: Date.now(),
           latencyMs,
           tokensInput:
-            response.success && response.data && 'usage' in response.data
-              ? (response.data as { usage: { tokens_input: number } }).usage
+            hasResponseData && 'usage' in responseData
+              ? (responseData as { usage: { tokens_input: number } }).usage
                   .tokens_input
               : null,
           tokensOutput:
-            response.success && response.data && 'usage' in response.data
-              ? (response.data as { usage: { tokens_output: number } }).usage
+            hasResponseData && 'usage' in responseData
+              ? (responseData as { usage: { tokens_output: number } }).usage
                   .tokens_output
+              : null,
+          generatedMedia:
+            hasResponseData && 'generated_media' in responseData
+              ? (responseData as { generated_media: GeneratedMedia[] })
+                  .generated_media
               : null,
         };
 
@@ -368,6 +382,7 @@ export const useEndpointTester = (
           latencyMs: Date.now() - startTime,
           tokensInput: null,
           tokensOutput: null,
+          generatedMedia: null,
         };
 
         setTestResults(prev => [result, ...prev]);
