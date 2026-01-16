@@ -72,9 +72,23 @@ export interface UseEndpointTesterReturn {
 }
 
 /**
- * Generate a sample value for a JSON Schema type
+ * Convert a key name to a readable sample label
+ * e.g., "source_language_code" → "language code", "texts" → "texts"
  */
-function generateSampleValue(schema: JsonSchema): unknown {
+function keyToSampleLabel(key: string): string {
+  // Remove common prefixes like source_, target_, input_, output_
+  let label = key.replace(/^(source_|target_|input_|output_)/, '');
+  // Replace underscores with spaces
+  label = label.replace(/_/g, ' ');
+  return label;
+}
+
+/**
+ * Generate a sample value for a JSON Schema type
+ * @param schema - The JSON Schema to generate a sample for
+ * @param key - Optional key name to derive sample string from
+ */
+function generateSampleValue(schema: JsonSchema, key?: string): unknown {
   switch (schema.type) {
     case 'string':
       if (schema.enum && Array.isArray(schema.enum)) {
@@ -82,6 +96,10 @@ function generateSampleValue(schema: JsonSchema): unknown {
       }
       if (schema.default !== undefined) {
         return schema.default;
+      }
+      // Generate sample based on key name
+      if (key) {
+        return `sample ${keyToSampleLabel(key)}`;
       }
       return 'sample string';
 
@@ -103,15 +121,17 @@ function generateSampleValue(schema: JsonSchema): unknown {
 
     case 'array':
       if (schema.items) {
-        return [generateSampleValue(schema.items)];
+        // For arrays, generate a sample item using the key (singular if possible)
+        const itemKey = key?.replace(/s$/, ''); // Simple singularization
+        return [generateSampleValue(schema.items, itemKey)];
       }
       return [];
 
     case 'object':
       if (schema.properties) {
         const obj: Record<string, unknown> = {};
-        for (const [key, propSchema] of Object.entries(schema.properties)) {
-          obj[key] = generateSampleValue(propSchema as JsonSchema);
+        for (const [propKey, propSchema] of Object.entries(schema.properties)) {
+          obj[propKey] = generateSampleValue(propSchema as JsonSchema, propKey);
         }
         return obj;
       }

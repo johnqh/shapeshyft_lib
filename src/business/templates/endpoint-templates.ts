@@ -367,13 +367,13 @@ export const localizationTemplate: ProjectTemplate = {
             items: { type: 'string' },
             description: 'List of text strings to translate',
           },
-          target_languages: {
+          target_language_codes: {
             type: 'array',
             items: { type: 'string' },
             description:
               'List of target language codes (e.g., "es", "fr", "de", "zh", "ja")',
           },
-          source_language: {
+          source_language_code: {
             type: 'string',
             description:
               'Source language code (optional, auto-detected if not provided)',
@@ -383,7 +383,7 @@ export const localizationTemplate: ProjectTemplate = {
             description: 'Whether to preserve formatting like line breaks',
           },
         },
-        required: ['texts', 'target_languages'],
+        required: ['texts', 'target_language_codes'],
       },
       output_schema: {
         type: 'object',
@@ -396,9 +396,9 @@ export const localizationTemplate: ProjectTemplate = {
               description: 'Translations of one text in all target languages',
             },
             description:
-              'Array of arrays - for each input text, translations in each target language (in same order as target_languages)',
+              'Array of arrays - for each input text, translations in each target language (in same order as target_language_codes)',
           },
-          detected_source_language: {
+          detected_source_language_code: {
             type: 'string',
             description: 'Detected source language code',
           },
@@ -406,7 +406,7 @@ export const localizationTemplate: ProjectTemplate = {
         required: ['translations'],
       },
       instructions:
-        'Translate each text in the texts array to all specified target languages. Return translations[i][j] as the translation of texts[i] into target_languages[j].',
+        'Translate each text in the texts array to all specified target language codes. Return translations[i][j] as the translation of texts[i] into target_language_codes[j].',
     },
     {
       endpoint_name: 'translate-single',
@@ -418,11 +418,11 @@ export const localizationTemplate: ProjectTemplate = {
             type: 'string',
             description: 'Text to translate',
           },
-          target_language: {
+          target_language_code: {
             type: 'string',
             description: 'Target language code (e.g., "es", "fr", "de")',
           },
-          source_language: {
+          source_language_code: {
             type: 'string',
             description: 'Source language code (optional)',
           },
@@ -431,7 +431,7 @@ export const localizationTemplate: ProjectTemplate = {
             description: 'Additional context to improve translation accuracy',
           },
         },
-        required: ['text', 'target_language'],
+        required: ['text', 'target_language_code'],
       },
       output_schema: {
         type: 'object',
@@ -440,7 +440,7 @@ export const localizationTemplate: ProjectTemplate = {
             type: 'string',
             description: 'Translated text',
           },
-          detected_source_language: {
+          detected_source_language_code: {
             type: 'string',
             description: 'Detected source language code',
           },
@@ -453,7 +453,7 @@ export const localizationTemplate: ProjectTemplate = {
         required: ['translation'],
       },
       instructions:
-        'Translate a single text to the specified target language. Optionally provide context for better accuracy.',
+        'Translate a single text to the specified target language code. Optionally provide context for better accuracy.',
     },
   ],
 };
