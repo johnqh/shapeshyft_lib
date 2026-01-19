@@ -25,7 +25,8 @@ export interface UseProjectTemplatesReturn {
   applyTemplate: (
     templateId: string,
     projectName: string,
-    llmKeyId: string
+    llmKeyId: string,
+    displayName?: string
   ) =>
     | {
         project: ProjectCreateRequest;
@@ -70,7 +71,8 @@ export const useProjectTemplates = (): UseProjectTemplatesReturn => {
     (
       templateId: string,
       projectName: string,
-      llmKeyId: string
+      llmKeyId: string,
+      displayName?: string
     ):
       | {
           project: ProjectCreateRequest;
@@ -81,7 +83,7 @@ export const useProjectTemplates = (): UseProjectTemplatesReturn => {
       if (!template) {
         return undefined;
       }
-      return applyTemplate(template, projectName, llmKeyId);
+      return applyTemplate(template, projectName, llmKeyId, displayName);
     },
     [getTemplate]
   );

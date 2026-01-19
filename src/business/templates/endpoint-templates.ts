@@ -859,18 +859,23 @@ export const ALL_TEMPLATES: ProjectTemplate[] = [
 
 /**
  * Apply a template to create project and endpoint requests
+ * @param template - The template to apply
+ * @param projectName - The project slug/name (lowercase, hyphen-separated)
+ * @param llmKeyId - The LLM key ID to use for endpoints
+ * @param displayName - Optional custom display name (defaults to template.name)
  */
 export function applyTemplate(
   template: ProjectTemplate,
   projectName: string,
-  llmKeyId: string
+  llmKeyId: string,
+  displayName?: string
 ): {
   project: ProjectCreateRequest;
   endpoints: EndpointCreateRequest[];
 } {
   const project: ProjectCreateRequest = {
     project_name: projectName,
-    display_name: template.name,
+    display_name: displayName?.trim() || template.name,
     description: template.description,
   };
 
