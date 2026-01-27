@@ -26,7 +26,7 @@
         "vitest": "^4.0.4",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.46",
+        "@sudobility/shapeshyft_client": "^0.0.48",
         "@sudobility/shapeshyft_types": "^1.0.36",
         "@sudobility/types": "^1.9.48",
         "@tanstack/react-query": ">=5.0.0",
