@@ -54,14 +54,16 @@ export interface UseEndpointTesterReturn {
     projectName: string,
     endpoint: Endpoint,
     sampleInput: unknown,
-    apiKey?: string
+    apiKey?: string,
+    timeout?: number
   ) => Promise<TestResult>;
   getPrompt: (
     organizationPath: string,
     projectName: string,
     endpointName: string,
     input: unknown,
-    apiKey?: string
+    apiKey?: string,
+    timeout?: number
   ) => Promise<{ success: boolean; prompt?: string; error?: string }>;
   generateSampleInput: (inputSchema: JsonSchema | null) => unknown;
   validateInput: (
@@ -310,7 +312,8 @@ export const useEndpointTester = (
       projectName: string,
       endpoint: Endpoint,
       sampleInput: unknown,
-      apiKey?: string
+      apiKey?: string,
+      timeout?: number
     ): Promise<TestResult> => {
       setIsLoading(true);
       setError(null);
@@ -347,7 +350,8 @@ export const useEndpointTester = (
           endpoint.endpoint_name,
           sampleInput,
           endpoint.http_method as HttpMethod,
-          apiKey
+          apiKey,
+          timeout
         );
 
         const latencyMs = Date.now() - startTime;
@@ -423,7 +427,8 @@ export const useEndpointTester = (
       projectName: string,
       endpointName: string,
       input: unknown,
-      apiKey?: string
+      apiKey?: string,
+      timeout?: number
     ): Promise<{ success: boolean; prompt?: string; error?: string }> => {
       setIsLoading(true);
       setError(null);
@@ -434,7 +439,8 @@ export const useEndpointTester = (
           projectName,
           endpointName,
           input,
-          apiKey
+          apiKey,
+          timeout
         );
 
         if (response.success && response.data) {
