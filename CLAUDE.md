@@ -8,6 +8,7 @@ Business logic library for ShapeShyft with Zustand stores and endpoint templates
 
 - **Language**: TypeScript
 - **Runtime**: Bun
+- **Package Manager**: Bun (do not use npm/yarn/pnpm for installing dependencies)
 - **State**: Zustand v5
 - **Build**: TypeScript compiler (tsc)
 - **Test**: Vitest
