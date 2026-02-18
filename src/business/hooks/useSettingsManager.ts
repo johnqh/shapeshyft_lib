@@ -3,7 +3,7 @@
  * Business logic hook that wraps the client useSettings hook with Zustand caching
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   NetworkClient,
   Optional,
@@ -60,10 +60,13 @@ export const useSettingsManager = ({
     settings: clientSettings,
     isLoading,
     error,
-    refresh: clientRefresh,
+    refetch,
     updateSettings: clientUpdateSettings,
     clearError,
-  } = useSettings(networkClient, baseUrl, testMode);
+  } = useSettings(networkClient, baseUrl, userId, token ?? null, {
+    testMode,
+    enabled: autoFetch,
+  });
 
   const cacheEntry = useSettingsStore(
     useCallback(state => state.cache[userId], [userId])
@@ -92,43 +95,18 @@ export const useSettingsManager = ({
    * Refresh settings from server
    */
   const refresh = useCallback(async (): Promise<void> => {
-    if (!token) {
-      return;
-    }
-    await clientRefresh(userId, token);
-  }, [clientRefresh, userId, token]);
+    await refetch();
+  }, [refetch]);
 
   /**
    * Update settings
    */
   const updateSettings = useCallback(
     async (data: UserSettingsUpdateRequest): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      const response = await clientUpdateSettings(userId, data, token);
-      if (response.success && response.data) {
-        setSettings(userId, response.data);
-      }
+      await clientUpdateSettings(data);
     },
-    [clientUpdateSettings, userId, token, setSettings]
+    [clientUpdateSettings]
   );
-
-  // Track if we've already attempted auto-fetch to prevent retry loops
-  const hasAttemptedFetchRef = useRef(false);
-
-  // Auto-fetch on mount (only once per token)
-  useEffect(() => {
-    if (autoFetch && token && !settings && !hasAttemptedFetchRef.current) {
-      hasAttemptedFetchRef.current = true;
-      refresh();
-    }
-  }, [autoFetch, token, settings, refresh]);
-
-  // Reset attempt flag when token changes (e.g., user re-authenticates)
-  useEffect(() => {
-    hasAttemptedFetchRef.current = false;
-  }, [token]);
 
   return useMemo(
     () => ({

@@ -3,7 +3,7 @@
  * Business logic hook that wraps the client useProjects hook with Zustand caching
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   GetApiKeyResponse,
   NetworkClient,
@@ -46,7 +46,7 @@ export interface UseProjectsManagerReturn {
   isCached: boolean;
   cachedAt: Optional<number>;
 
-  refresh: (params?: ProjectQueryParams) => Promise<void>;
+  refresh: () => Promise<void>;
   createProject: (data: ProjectCreateRequest) => Promise<Project | undefined>;
   updateProject: (
     projectId: string,
@@ -76,21 +76,23 @@ export const useProjectsManager = ({
     projects: clientProjects,
     isLoading,
     error,
-    refresh: clientRefresh,
+    refetch,
     createProject: clientCreateProject,
     updateProject: clientUpdateProject,
     deleteProject: clientDeleteProject,
     getProjectApiKey: clientGetProjectApiKey,
     refreshProjectApiKey: clientRefreshProjectApiKey,
     clearError,
-  } = useProjects(networkClient, baseUrl, testMode);
+  } = useProjects(networkClient, baseUrl, entitySlug, token ?? null, {
+    testMode,
+    enabled: autoFetch,
+    params,
+  });
+
   const cacheEntry = useProjectsStore(
     useCallback(state => state.cache[entitySlug], [entitySlug])
   );
   const setProjects = useProjectsStore(state => state.setProjects);
-  const addProject = useProjectsStore(state => state.addProject);
-  const updateProjectInStore = useProjectsStore(state => state.updateProject);
-  const removeProject = useProjectsStore(state => state.removeProject);
 
   // Get cached data
   const cachedProjects = cacheEntry?.projects;
@@ -114,32 +116,22 @@ export const useProjectsManager = ({
   /**
    * Refresh projects from server
    */
-  const refresh = useCallback(
-    async (queryParams?: ProjectQueryParams): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      await clientRefresh(entitySlug, token, queryParams ?? params);
-    },
-    [clientRefresh, entitySlug, token, params]
-  );
+  const refresh = useCallback(async (): Promise<void> => {
+    await refetch();
+  }, [refetch]);
 
   /**
    * Create a new project
    */
   const createProject = useCallback(
     async (data: ProjectCreateRequest): Promise<Project | undefined> => {
-      if (!token) {
-        return undefined;
-      }
-      const response = await clientCreateProject(entitySlug, data, token);
+      const response = await clientCreateProject(data);
       if (response.success && response.data) {
-        addProject(entitySlug, response.data);
         return response.data;
       }
       return undefined;
     },
-    [clientCreateProject, entitySlug, token, addProject]
+    [clientCreateProject]
   );
 
   /**
@@ -147,20 +139,9 @@ export const useProjectsManager = ({
    */
   const updateProject = useCallback(
     async (projectId: string, data: ProjectUpdateRequest): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      const response = await clientUpdateProject(
-        entitySlug,
-        projectId,
-        data,
-        token
-      );
-      if (response.success && response.data) {
-        updateProjectInStore(entitySlug, projectId, response.data);
-      }
+      await clientUpdateProject(projectId, data);
     },
-    [clientUpdateProject, entitySlug, token, updateProjectInStore]
+    [clientUpdateProject]
   );
 
   /**
@@ -168,15 +149,9 @@ export const useProjectsManager = ({
    */
   const deleteProject = useCallback(
     async (projectId: string): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      const response = await clientDeleteProject(entitySlug, projectId, token);
-      if (response.success) {
-        removeProject(entitySlug, projectId);
-      }
+      await clientDeleteProject(projectId);
     },
-    [clientDeleteProject, entitySlug, token, removeProject]
+    [clientDeleteProject]
   );
 
   /**
@@ -184,20 +159,13 @@ export const useProjectsManager = ({
    */
   const getProjectApiKey = useCallback(
     async (projectId: string): Promise<GetApiKeyResponse | null> => {
-      if (!token) {
-        return null;
-      }
-      const response = await clientGetProjectApiKey(
-        entitySlug,
-        projectId,
-        token
-      );
+      const response = await clientGetProjectApiKey(projectId);
       if (response.success && response.data) {
         return response.data;
       }
       return null;
     },
-    [clientGetProjectApiKey, entitySlug, token]
+    [clientGetProjectApiKey]
   );
 
   /**
@@ -205,44 +173,14 @@ export const useProjectsManager = ({
    */
   const refreshProjectApiKey = useCallback(
     async (projectId: string): Promise<RefreshApiKeyResponse | null> => {
-      if (!token) {
-        return null;
-      }
-      const response = await clientRefreshProjectApiKey(
-        entitySlug,
-        projectId,
-        token
-      );
+      const response = await clientRefreshProjectApiKey(projectId);
       if (response.success && response.data) {
-        // Refresh the projects list to get updated api_key_prefix
-        await refresh();
         return response.data;
       }
       return null;
     },
-    [clientRefreshProjectApiKey, entitySlug, token, refresh]
+    [clientRefreshProjectApiKey]
   );
-
-  // Track if we've already attempted auto-fetch to prevent retry loops
-  const hasAttemptedFetchRef = useRef(false);
-
-  // Auto-fetch on mount (only once per token)
-  useEffect(() => {
-    if (
-      autoFetch &&
-      token &&
-      projects.length === 0 &&
-      !hasAttemptedFetchRef.current
-    ) {
-      hasAttemptedFetchRef.current = true;
-      refresh();
-    }
-  }, [autoFetch, token, projects.length, refresh]);
-
-  // Reset attempt flag when token changes (e.g., user re-authenticates)
-  useEffect(() => {
-    hasAttemptedFetchRef.current = false;
-  }, [token]);
 
   return useMemo(
     () => ({

@@ -3,7 +3,7 @@
  * Business logic hook that wraps the client useKeys hook with Zustand caching
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   LlmApiKeyCreateRequest,
   LlmApiKeySafe,
@@ -60,19 +60,20 @@ export const useKeysManager = ({
     keys: clientKeys,
     isLoading,
     error,
-    refresh: clientRefresh,
+    refetch,
     createKey: clientCreateKey,
     updateKey: clientUpdateKey,
     deleteKey: clientDeleteKey,
     clearError,
-  } = useKeys(networkClient, baseUrl, testMode);
+  } = useKeys(networkClient, baseUrl, entitySlug, token ?? null, {
+    testMode,
+    enabled: autoFetch,
+  });
+
   const cacheEntry = useKeysStore(
     useCallback(state => state.cache[entitySlug], [entitySlug])
   );
   const setKeys = useKeysStore(state => state.setKeys);
-  const addKey = useKeysStore(state => state.addKey);
-  const updateKeyInStore = useKeysStore(state => state.updateKey);
-  const removeKey = useKeysStore(state => state.removeKey);
 
   // Get cached data
   const cachedKeys = cacheEntry?.keys;
@@ -96,26 +97,17 @@ export const useKeysManager = ({
    * Refresh keys from server
    */
   const refresh = useCallback(async (): Promise<void> => {
-    if (!token) {
-      return;
-    }
-    await clientRefresh(entitySlug, token);
-  }, [clientRefresh, entitySlug, token]);
+    await refetch();
+  }, [refetch]);
 
   /**
    * Create a new key
    */
   const createKey = useCallback(
     async (data: LlmApiKeyCreateRequest): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      const response = await clientCreateKey(entitySlug, data, token);
-      if (response.success && response.data) {
-        addKey(entitySlug, response.data);
-      }
+      await clientCreateKey(data);
     },
-    [clientCreateKey, entitySlug, token, addKey]
+    [clientCreateKey]
   );
 
   /**
@@ -123,15 +115,9 @@ export const useKeysManager = ({
    */
   const updateKey = useCallback(
     async (keyId: string, data: LlmApiKeyUpdateRequest): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      const response = await clientUpdateKey(entitySlug, keyId, data, token);
-      if (response.success && response.data) {
-        updateKeyInStore(entitySlug, keyId, response.data);
-      }
+      await clientUpdateKey(keyId, data);
     },
-    [clientUpdateKey, entitySlug, token, updateKeyInStore]
+    [clientUpdateKey]
   );
 
   /**
@@ -139,37 +125,10 @@ export const useKeysManager = ({
    */
   const deleteKey = useCallback(
     async (keyId: string): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      const response = await clientDeleteKey(entitySlug, keyId, token);
-      if (response.success) {
-        removeKey(entitySlug, keyId);
-      }
+      await clientDeleteKey(keyId);
     },
-    [clientDeleteKey, entitySlug, token, removeKey]
+    [clientDeleteKey]
   );
-
-  // Track if we've already attempted auto-fetch to prevent retry loops
-  const hasAttemptedFetchRef = useRef(false);
-
-  // Auto-fetch on mount (only once per token)
-  useEffect(() => {
-    if (
-      autoFetch &&
-      token &&
-      keys.length === 0 &&
-      !hasAttemptedFetchRef.current
-    ) {
-      hasAttemptedFetchRef.current = true;
-      refresh();
-    }
-  }, [autoFetch, token, keys.length, refresh]);
-
-  // Reset attempt flag when token changes (e.g., user re-authenticates)
-  useEffect(() => {
-    hasAttemptedFetchRef.current = false;
-  }, [token]);
 
   return useMemo(
     () => ({

@@ -42,7 +42,7 @@ export interface UseAnalyticsManagerReturn {
   isCached: boolean;
   cachedAt: Optional<number>;
 
-  refresh: (params?: UsageAnalyticsQueryParams) => Promise<void>;
+  refresh: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -62,9 +62,14 @@ export const useAnalyticsManager = ({
     analytics: clientAnalytics,
     isLoading,
     error,
-    refresh: clientRefresh,
+    refetch,
     clearError,
-  } = useAnalytics(networkClient, baseUrl, testMode);
+  } = useAnalytics(networkClient, baseUrl, userId, token ?? null, {
+    testMode,
+    enabled: autoFetch,
+    params,
+  });
+
   const cacheEntry = useAnalyticsStore(
     useCallback(state => state.cache[userId], [userId])
   );
@@ -88,22 +93,9 @@ export const useAnalyticsManager = ({
   /**
    * Refresh analytics from server
    */
-  const refresh = useCallback(
-    async (queryParams?: UsageAnalyticsQueryParams): Promise<void> => {
-      if (!token) {
-        return;
-      }
-      await clientRefresh(userId, token, queryParams ?? params);
-    },
-    [clientRefresh, userId, token, params]
-  );
-
-  // Auto-fetch on mount
-  useEffect(() => {
-    if (autoFetch && token && !analytics) {
-      refresh();
-    }
-  }, [autoFetch, token, analytics, refresh]);
+  const refresh = useCallback(async (): Promise<void> => {
+    await refetch();
+  }, [refetch]);
 
   return useMemo(
     () => ({
