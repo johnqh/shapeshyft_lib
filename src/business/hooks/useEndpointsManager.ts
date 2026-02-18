@@ -77,11 +77,18 @@ export const useEndpointsManager = ({
     updateEndpoint: clientUpdateEndpoint,
     deleteEndpoint: clientDeleteEndpoint,
     clearError,
-  } = useEndpoints(networkClient, baseUrl, entitySlug, projectId, token ?? null, {
-    testMode,
-    enabled: autoFetch,
-    params,
-  });
+  } = useEndpoints(
+    networkClient,
+    baseUrl,
+    entitySlug,
+    projectId,
+    token ?? null,
+    {
+      testMode,
+      enabled: autoFetch,
+      params,
+    }
+  );
 
   const cacheKey = useMemo(
     () => `${entitySlug}:${projectId}`,
