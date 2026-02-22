@@ -152,3 +152,55 @@ Test coverage:
 - Cache isolation between stores
 - Template structure validation
 - Template application
+
+## Workspace Context
+
+This project is part of the **ShapeShyft** multi-project workspace at the parent directory. See `../CLAUDE.md` for the full architecture, dependency graph, and build order.
+
+## Downstream Impact
+
+| Downstream Consumer | Relationship |
+|---------------------|-------------|
+| `shapeshyft_app` | Direct dependency - uses stores, manager hooks, and templates |
+
+After making changes:
+1. Run checks (no `verify` script - see below)
+2. `npm publish`
+3. In `shapeshyft_app`: `bun update @sudobility/shapeshyft_lib` -> rebuild
+
+## Local Dev Workflow
+
+```bash
+# In this project:
+bun link
+
+# In shapeshyft_app:
+bun link @sudobility/shapeshyft_lib
+
+# If also changing shapeshyft_client, link it first:
+cd ../shapeshyft_client && bun link
+cd ../shapeshyft_lib && bun link @sudobility/shapeshyft_client
+
+# Rebuild after changes:
+bun run build
+
+# When done, unlink:
+bun unlink @sudobility/shapeshyft_lib && bun install
+```
+
+## Pre-Commit Checklist
+
+No `verify` script. Run checks manually:
+
+```bash
+bun run typecheck && bun run lint && bun run test:run && bun run build
+```
+
+Note: `bun run test` starts watch mode. Use `bun run test:run` for single run.
+
+## Gotchas
+
+- **`publishConfig.access` is `"restricted"`** -- intentionally a private npm package.
+- **Zustand stores are entity-scoped** -- all store methods take `entitySlug` or `userId` as a key. Do not cache data under the wrong scope.
+- **Stores are global singletons** -- they persist across renders and unmounts. Call `reset()` or `clearX()` when the user switches entities or logs out.
+- **Peer dependency on `shapeshyft_client`** -- this package wraps client hooks. If you update `shapeshyft_client`, verify compatibility here.
