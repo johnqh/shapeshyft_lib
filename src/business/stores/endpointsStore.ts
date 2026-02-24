@@ -1,79 +1,147 @@
 /**
  * Endpoints Store
- * Zustand store for caching endpoints by entity slug and project ID
+ *
+ * Zustand store for caching endpoints by entity slug and project ID.
+ * Uses a composite cache key of `entitySlug:projectId` to support
+ * caching endpoints for multiple projects across multiple entities.
+ *
+ * This is a global singleton store that persists across React renders
+ * and unmounts.
+ *
+ * **Important**: Call `clearEndpoints()`, `clearEntityEndpoints()`, or `clearAll()`
+ * when the user switches entities or logs out to avoid leaking data between sessions.
+ *
+ * @module
  */
 
 import { create } from 'zustand';
 import type { Endpoint } from '@sudobility/shapeshyft_types';
 
 /**
- * Endpoints cache entry
+ * Endpoints cache entry containing the cached endpoints and metadata.
  */
 interface EndpointsCacheEntry {
   /** Array of endpoints for this project */
   endpoints: Endpoint[];
-  /** Timestamp when this data was cached */
+  /** Unix timestamp (ms) when this data was cached */
   cachedAt: number;
 }
 
 /**
- * Create a cache key from entitySlug and projectId
+ * Create a composite cache key from entitySlug and projectId.
+ * Format: `"entitySlug:projectId"`
  */
 function makeCacheKey(entitySlug: string, projectId: string): string {
   return `${entitySlug}:${projectId}`;
 }
 
 /**
- * Endpoints store state
+ * Endpoints store state and actions.
+ *
+ * All methods are scoped by `entitySlug` and `projectId` to support
+ * multi-entity, multi-project caching.
  */
 interface EndpointsStoreState {
-  /** Cache of endpoints keyed by entitySlug:projectId */
+  /** Cache of endpoints keyed by composite key `entitySlug:projectId` */
   cache: Record<string, EndpointsCacheEntry>;
-  /** Set endpoints for a specific entity/project */
+
+  /**
+   * Replace all cached endpoints for an entity/project pair.
+   * Overwrites any existing cache entry and updates the `cachedAt` timestamp.
+   */
   setEndpoints: (
     entitySlug: string,
     projectId: string,
     endpoints: Endpoint[]
   ) => void;
-  /** Get endpoints for a specific entity/project */
+
+  /**
+   * Get the cached endpoints array for an entity/project pair.
+   * @returns The endpoints array, or `undefined` if no cache entry exists.
+   */
   getEndpoints: (
     entitySlug: string,
     projectId: string
   ) => Endpoint[] | undefined;
-  /** Get cache entry for a specific entity/project */
+
+  /**
+   * Get the full cache entry (endpoints + metadata) for an entity/project pair.
+   * @returns The cache entry with `endpoints` and `cachedAt`, or `undefined` if not cached.
+   */
   getCacheEntry: (
     entitySlug: string,
     projectId: string
   ) => EndpointsCacheEntry | undefined;
-  /** Add a single endpoint to the cache */
+
+  /**
+   * Add a single endpoint to the entity/project cache.
+   * If no cache entry exists, a new entry is created with just this endpoint.
+   * If an entry already exists, the endpoint is appended to the existing array.
+   */
   addEndpoint: (
     entitySlug: string,
     projectId: string,
     endpoint: Endpoint
   ) => void;
-  /** Update an endpoint in the cache */
+
+  /**
+   * Update a specific endpoint in the cache by its UUID.
+   * Matches endpoints by `endpoint.uuid === endpointId`. If no cache entry exists,
+   * or the endpoint ID is not found, the state is not modified.
+   */
   updateEndpoint: (
     entitySlug: string,
     projectId: string,
     endpointId: string,
     endpoint: Endpoint
   ) => void;
-  /** Remove an endpoint from the cache */
+
+  /**
+   * Remove a specific endpoint from the cache by its UUID.
+   * If no cache entry exists, the state is not modified.
+   */
   removeEndpoint: (
     entitySlug: string,
     projectId: string,
     endpointId: string
   ) => void;
-  /** Clear endpoints for a specific entity/project */
+
+  /**
+   * Clear the cache entry for a specific entity/project pair.
+   * After this call, `getEndpoints(entitySlug, projectId)` will return `undefined`.
+   */
   clearEndpoints: (entitySlug: string, projectId: string) => void;
-  /** Clear all endpoints for an entity */
+
+  /**
+   * Clear all cache entries for a specific entity (across all projects).
+   * Useful when a user leaves an organization.
+   */
   clearEntityEndpoints: (entitySlug: string) => void;
-  /** Clear all cached endpoints */
+
+  /**
+   * Clear all cached endpoints for all entities and projects.
+   * Should be called on logout to prevent data leakage.
+   */
   clearAll: () => void;
 }
 
 /**
- * Zustand store for endpoints caching
+ * Zustand store for endpoints caching.
+ *
+ * This store is a global singleton -- it persists across renders and unmounts.
+ * Use `clearAll()` on logout to prevent data leakage between entities.
+ *
+ * @example
+ * ```ts
+ * // Read endpoints for a project
+ * const endpoints = useEndpointsStore.getState().getEndpoints(entitySlug, projectId);
+ *
+ * // Subscribe to endpoints in a React component
+ * const endpoints = useEndpointsStore(state => state.getEndpoints(entitySlug, projectId));
+ *
+ * // Add a new endpoint
+ * useEndpointsStore.getState().addEndpoint(entitySlug, projectId, newEndpoint);
+ * ```
  */
 export const useEndpointsStore = create<EndpointsStoreState>((set, get) => ({
   cache: {},

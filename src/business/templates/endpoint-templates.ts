@@ -1,5 +1,16 @@
 /**
- * Pre-built endpoint templates for common use cases
+ * Pre-built Endpoint Templates
+ *
+ * Provides a library of pre-configured project templates for common AI use cases.
+ * Each template defines a project with one or more endpoints, including their
+ * input/output schemas and LLM instructions.
+ *
+ * Templates are organized by category (Classification, Analysis, Extraction,
+ * Generation, Translation, Vision, Transcription, Processing) and can be
+ * applied via {@link applyTemplate} to create `ProjectCreateRequest` and
+ * `EndpointCreateRequest` objects ready for API submission.
+ *
+ * @module
  */
 
 import type {
@@ -9,27 +20,49 @@ import type {
 } from '@sudobility/shapeshyft_types';
 
 /**
- * Project template definition
+ * Project template definition.
+ *
+ * A template describes a complete project setup including its metadata
+ * and one or more endpoint configurations. Templates are static constants
+ * and do not include versioning -- see IMPROVEMENTS.md for planned enhancements.
  */
 export interface ProjectTemplate {
+  /** Unique template identifier (URL-safe slug, e.g., "text-classifier") */
   id: string;
+  /** Human-readable template name (e.g., "Text Classifier") */
   name: string;
+  /** Brief description of what this template does */
   description: string;
+  /** Category for grouping in UI (e.g., "Classification", "Analysis") */
   category: string;
+  /** Array of endpoint configurations included in this template */
   endpoints: EndpointTemplate[];
-  /** If true, this template requires capabilities not yet implemented (V2 features) */
+  /**
+   * If true, this template requires capabilities not yet implemented in V1.
+   * Templates with `requiresV2: true` should be displayed but not usable
+   * until the required features are available.
+   */
   requiresV2?: boolean;
 }
 
 /**
- * Endpoint template definition
+ * Endpoint template definition.
+ *
+ * Describes a single endpoint configuration within a project template,
+ * including its JSON Schema for input/output and LLM instructions.
  */
 export interface EndpointTemplate {
+  /** URL-safe endpoint name (e.g., "classify", "extract-entities") */
   endpoint_name: string;
+  /** Human-readable display name (e.g., "Classify Text") */
   display_name: string;
+  /** JSON Schema defining the expected input structure */
   input_schema: JsonSchema;
+  /** JSON Schema defining the expected output structure */
   output_schema: JsonSchema;
+  /** LLM instructions that describe how to process the input */
   instructions: string;
+  /** Optional additional context to include with the LLM prompt */
   context?: string;
 }
 

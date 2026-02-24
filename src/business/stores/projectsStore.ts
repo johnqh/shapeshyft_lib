@@ -1,51 +1,109 @@
 /**
  * Projects Store
- * Zustand store for caching projects by entity slug
+ *
+ * Zustand store for caching projects by entity slug. This is a global
+ * singleton store that persists across React renders and unmounts.
+ *
+ * **Important**: Call `clearProjects(entitySlug)` or `clearAll()` when the user
+ * switches entities or logs out to avoid leaking data between sessions.
+ *
+ * @module
  */
 
 import { create } from 'zustand';
 import type { Project } from '@sudobility/shapeshyft_types';
 
 /**
- * Projects cache entry
+ * Projects cache entry containing the cached projects and metadata.
  */
 interface ProjectsCacheEntry {
   /** Array of projects for this entity */
   projects: Project[];
-  /** Timestamp when this data was cached */
+  /** Unix timestamp (ms) when this data was cached */
   cachedAt: number;
 }
 
 /**
- * Projects store state
+ * Projects store state and actions.
+ *
+ * All methods are scoped by `entitySlug` to support multi-entity caching.
  */
 interface ProjectsStoreState {
   /** Cache of projects keyed by entity slug */
   cache: Record<string, ProjectsCacheEntry>;
-  /** Set projects for a specific entity slug */
+
+  /**
+   * Replace all cached projects for an entity.
+   * Overwrites any existing cache entry and updates the `cachedAt` timestamp.
+   */
   setProjects: (entitySlug: string, projects: Project[]) => void;
-  /** Get projects for a specific entity slug */
+
+  /**
+   * Get the cached projects array for an entity.
+   * @returns The projects array, or `undefined` if no cache entry exists.
+   */
   getProjects: (entitySlug: string) => Project[] | undefined;
-  /** Get cache entry for a specific entity slug */
+
+  /**
+   * Get the full cache entry (projects + metadata) for an entity.
+   * @returns The cache entry with `projects` and `cachedAt`, or `undefined` if not cached.
+   */
   getCacheEntry: (entitySlug: string) => ProjectsCacheEntry | undefined;
-  /** Add a single project to the cache */
+
+  /**
+   * Add a single project to the entity's cache.
+   * If no cache entry exists for the entity, a new entry is created with just this project.
+   * If an entry already exists, the project is appended to the existing array.
+   */
   addProject: (entitySlug: string, project: Project) => void;
-  /** Update a project in the cache */
+
+  /**
+   * Update a specific project in the cache by its UUID.
+   * Matches projects by `project.uuid === projectId`. If the entity has no cache entry,
+   * or the project ID is not found, the state is not modified.
+   */
   updateProject: (
     entitySlug: string,
     projectId: string,
     project: Project
   ) => void;
-  /** Remove a project from the cache */
+
+  /**
+   * Remove a specific project from the cache by its UUID.
+   * If the entity has no cache entry, the state is not modified.
+   */
   removeProject: (entitySlug: string, projectId: string) => void;
-  /** Clear projects for a specific entity slug */
+
+  /**
+   * Clear the entire cache entry for a specific entity.
+   * After this call, `getProjects(entitySlug)` will return `undefined`.
+   */
   clearProjects: (entitySlug: string) => void;
-  /** Clear all cached projects */
+
+  /**
+   * Clear all cached projects for all entities.
+   * Should be called on logout to prevent data leakage.
+   */
   clearAll: () => void;
 }
 
 /**
- * Zustand store for projects caching
+ * Zustand store for projects caching.
+ *
+ * This store is a global singleton -- it persists across renders and unmounts.
+ * Use `clearAll()` on logout to prevent data leakage between entities.
+ *
+ * @example
+ * ```ts
+ * // Read projects for an entity
+ * const projects = useProjectsStore.getState().getProjects(entitySlug);
+ *
+ * // Subscribe to projects in a React component
+ * const projects = useProjectsStore(state => state.getProjects(entitySlug));
+ *
+ * // Add a new project
+ * useProjectsStore.getState().addProject(entitySlug, newProject);
+ * ```
  */
 export const useProjectsStore = create<ProjectsStoreState>((set, get) => ({
   cache: {},

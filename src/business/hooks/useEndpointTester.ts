@@ -1,6 +1,15 @@
 /**
  * Endpoint Tester Hook
- * Test endpoints with sample data and validate input/output
+ *
+ * Provides endpoint testing functionality including:
+ * - Executing endpoints with sample data via the AI execution API
+ * - Generating sample input from JSON Schema definitions
+ * - Validating input against JSON Schema before execution
+ * - Tracking test results with latency and token usage metrics
+ * - Retrieving assembled prompts without execution (dry-run)
+ *
+ * Schema validation and sample generation are delegated to the extracted
+ * utilities in `src/utils/schema-validation.ts` for independent testability.
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -13,42 +22,65 @@ import type {
   Optional,
 } from '@sudobility/shapeshyft_types';
 import { useAiExecute } from '@sudobility/shapeshyft_client';
+import {
+  generateSampleValue,
+  validateValue,
+  type ValidationResult,
+} from '../../utils/schema-validation';
 
 /**
- * Test result type
+ * Result of testing an endpoint with sample data.
+ *
+ * Captures the full round-trip of a test execution including input/output,
+ * timing, token usage, and any errors encountered.
  */
 export interface TestResult {
+  /** Unique identifier for this test result */
   id: string;
+  /** UUID of the tested endpoint */
   endpointId: string;
+  /** Slug name of the tested endpoint */
   endpointName: string;
+  /** The input payload sent to the endpoint */
   input: unknown;
+  /** The output received from the endpoint (null on failure) */
   output: unknown;
+  /** Whether the test execution succeeded */
   success: boolean;
+  /** Error message if the test failed */
   error: Optional<string>;
+  /** Unix timestamp (ms) when the test was executed */
   timestamp: number;
+  /** Round-trip latency in milliseconds (null if not measurable) */
   latencyMs: Optional<number>;
+  /** Number of input tokens consumed (null if not reported) */
   tokensInput: Optional<number>;
+  /** Number of output tokens generated (null if not reported) */
   tokensOutput: Optional<number>;
   /** Generated media from models like GPT-4o (audio), Imagen (images), Veo (video) */
   generatedMedia: Optional<GeneratedMedia[]>;
 }
 
-/**
- * Input validation result
- */
-export interface ValidationResult {
-  valid: boolean;
-  errors: string[];
-}
+// Re-export ValidationResult from the schema-validation utility
+// so consumers importing from useEndpointTester still get it
+export type { ValidationResult } from '../../utils/schema-validation';
 
 /**
  * Return type for useEndpointTester
  */
 export interface UseEndpointTesterReturn {
+  /** History of test results, most recent first */
   testResults: TestResult[];
+  /** Whether a test is currently executing */
   isLoading: boolean;
+  /** Most recent error message, if any */
   error: Optional<string>;
 
+  /**
+   * Execute an endpoint test with the given input.
+   * Validates input against the endpoint's input_schema before execution.
+   * Results are prepended to the testResults array.
+   */
   testEndpoint: (
     organizationPath: string,
     projectName: string,
@@ -57,6 +89,10 @@ export interface UseEndpointTesterReturn {
     apiKey?: string,
     timeout?: number
   ) => Promise<TestResult>;
+  /**
+   * Get the assembled prompt for an endpoint without executing it (dry-run).
+   * Useful for debugging and understanding what the LLM will receive.
+   */
   getPrompt: (
     organizationPath: string,
     projectName: string,
@@ -65,198 +101,21 @@ export interface UseEndpointTesterReturn {
     apiKey?: string,
     timeout?: number
   ) => Promise<{ success: boolean; prompt?: string; error?: string }>;
+  /**
+   * Generate sample input data from a JSON Schema.
+   * Returns an empty object if the schema is null.
+   */
   generateSampleInput: (inputSchema: JsonSchema | null) => unknown;
+  /**
+   * Validate input data against a JSON Schema.
+   * Returns { valid: true, errors: [] } if schema is null (no validation needed).
+   */
   validateInput: (
     input: unknown,
     schema: JsonSchema | null
   ) => ValidationResult;
+  /** Clear all test results and errors */
   clearResults: () => void;
-}
-
-/**
- * Convert a key name to a readable sample label
- * e.g., "source_language_code" → "language code", "texts" → "texts"
- */
-function keyToSampleLabel(key: string): string {
-  // Remove common prefixes like source_, target_, input_, output_
-  let label = key.replace(/^(source_|target_|input_|output_)/, '');
-  // Replace underscores with spaces
-  label = label.replace(/_/g, ' ');
-  return label;
-}
-
-/**
- * Generate a sample value for a JSON Schema type
- * @param schema - The JSON Schema to generate a sample for
- * @param key - Optional key name to derive sample string from
- */
-function generateSampleValue(schema: JsonSchema, key?: string): unknown {
-  switch (schema.type) {
-    case 'string':
-      if (schema.enum && Array.isArray(schema.enum)) {
-        return schema.enum[0];
-      }
-      if (schema.default !== undefined) {
-        return schema.default;
-      }
-      // Generate sample based on key name
-      if (key) {
-        return `sample ${keyToSampleLabel(key)}`;
-      }
-      return 'sample string';
-
-    case 'number':
-    case 'integer':
-      if (schema.default !== undefined) {
-        return schema.default;
-      }
-      if (schema.minimum !== undefined) {
-        return schema.minimum;
-      }
-      return 0;
-
-    case 'boolean':
-      if (schema.default !== undefined) {
-        return schema.default;
-      }
-      return true;
-
-    case 'array':
-      if (schema.items) {
-        // For arrays, generate a sample item using the key (singular if possible)
-        const itemKey = key?.replace(/s$/, ''); // Simple singularization
-        return [generateSampleValue(schema.items, itemKey)];
-      }
-      return [];
-
-    case 'object':
-      if (schema.properties) {
-        const obj: Record<string, unknown> = {};
-        for (const [propKey, propSchema] of Object.entries(schema.properties)) {
-          obj[propKey] = generateSampleValue(propSchema as JsonSchema, propKey);
-        }
-        return obj;
-      }
-      return {};
-
-    default:
-      return null;
-  }
-}
-
-/**
- * Validate a value against a JSON Schema (basic validation)
- */
-function validateValue(
-  value: unknown,
-  schema: JsonSchema,
-  path: string
-): string[] {
-  const errors: string[] = [];
-
-  if (value === null || value === undefined) {
-    return errors;
-  }
-
-  switch (schema.type) {
-    case 'string':
-      if (typeof value !== 'string') {
-        errors.push(`${path}: expected string, got ${typeof value}`);
-      } else {
-        if (schema.minLength !== undefined && value.length < schema.minLength) {
-          errors.push(
-            `${path}: string length ${value.length} is less than minLength ${schema.minLength}`
-          );
-        }
-        if (schema.maxLength !== undefined && value.length > schema.maxLength) {
-          errors.push(
-            `${path}: string length ${value.length} exceeds maxLength ${schema.maxLength}`
-          );
-        }
-        if (schema.enum && !schema.enum.includes(value)) {
-          errors.push(
-            `${path}: value "${value}" is not in enum [${schema.enum.join(', ')}]`
-          );
-        }
-      }
-      break;
-
-    case 'number':
-    case 'integer':
-      if (typeof value !== 'number') {
-        errors.push(`${path}: expected number, got ${typeof value}`);
-      } else {
-        if (schema.type === 'integer' && !Number.isInteger(value)) {
-          errors.push(`${path}: expected integer, got float`);
-        }
-        if (schema.minimum !== undefined && value < schema.minimum) {
-          errors.push(
-            `${path}: value ${value} is less than minimum ${schema.minimum}`
-          );
-        }
-        if (schema.maximum !== undefined && value > schema.maximum) {
-          errors.push(
-            `${path}: value ${value} exceeds maximum ${schema.maximum}`
-          );
-        }
-      }
-      break;
-
-    case 'boolean':
-      if (typeof value !== 'boolean') {
-        errors.push(`${path}: expected boolean, got ${typeof value}`);
-      }
-      break;
-
-    case 'array':
-      if (!Array.isArray(value)) {
-        errors.push(`${path}: expected array, got ${typeof value}`);
-      } else if (schema.items) {
-        value.forEach((item, index) => {
-          errors.push(
-            ...validateValue(
-              item,
-              schema.items as JsonSchema,
-              `${path}[${index}]`
-            )
-          );
-        });
-      }
-      break;
-
-    case 'object':
-      if (typeof value !== 'object' || Array.isArray(value)) {
-        errors.push(`${path}: expected object, got ${typeof value}`);
-      } else if (schema.properties) {
-        const obj = value as Record<string, unknown>;
-
-        // Check required properties
-        if (schema.required) {
-          for (const reqKey of schema.required) {
-            if (!(reqKey in obj)) {
-              errors.push(`${path}: missing required property "${reqKey}"`);
-            }
-          }
-        }
-
-        // Validate each property
-        for (const [key, propValue] of Object.entries(obj)) {
-          const propSchema = schema.properties[key];
-          if (propSchema) {
-            errors.push(
-              ...validateValue(
-                propValue,
-                propSchema as JsonSchema,
-                `${path}.${key}`
-              )
-            );
-          }
-        }
-      }
-      break;
-  }
-
-  return errors;
 }
 
 /**

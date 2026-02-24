@@ -42,6 +42,7 @@ src/
 │       └── endpoint-templates.test.ts
 ├── types/                # Type definitions
 └── utils/                # General utilities
+    └── schema-validation.ts  # JSON Schema validation & sample generation
 ```
 
 ## Commands
@@ -190,13 +191,11 @@ bun unlink @sudobility/shapeshyft_lib && bun install
 
 ## Pre-Commit Checklist
 
-No `verify` script. Run checks manually:
-
 ```bash
-bun run typecheck && bun run lint && bun run test:run && bun run build
+bun run verify
 ```
 
-Note: `bun run test` starts watch mode. Use `bun run test:run` for single run.
+This runs: `typecheck -> lint -> test -> build`
 
 ## Gotchas
 

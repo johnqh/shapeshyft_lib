@@ -1,6 +1,17 @@
 /**
  * Projects Manager Hook
- * Business logic hook that wraps the client useProjects hook with Zustand caching
+ *
+ * Business logic hook that wraps the client `useProjects` hook with Zustand caching.
+ *
+ * **Data flow**:
+ * 1. On mount (if `autoFetch` is true and `token` is available), fetches projects from the server.
+ * 2. Server data is synced to `useProjectsStore` for caching.
+ * 3. Returns fresh server data when available, falls back to cached data otherwise.
+ * 4. `isCached` flag indicates whether the data source is the cache.
+ *
+ * **Entity scoping**: All data is scoped by `entitySlug`.
+ *
+ * @module
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
@@ -24,15 +35,22 @@ import { useProjectsStore } from '../stores/projectsStore';
  * Configuration for useProjectsManager
  */
 export interface UseProjectsManagerConfig {
+  /** Base URL of the ShapeShyft API */
   baseUrl: string;
+  /** Network client instance for making HTTP requests */
   networkClient: NetworkClient;
+  /** Entity slug (organization path) to scope the projects to */
   entitySlug: string;
+  /** Firebase ID token for authentication, or null if not yet authenticated */
   token: Optional<FirebaseIdToken>;
-  /** Testnet/sandbox mode */
+  /** Enable testnet/sandbox mode (default: false) */
   testMode?: boolean;
-  /** Auto-fetch on mount when token is available */
+  /**
+   * Auto-fetch projects on mount when token is available (default: true).
+   * Set to false to defer fetching until `refresh()` is called manually.
+   */
   autoFetch?: boolean;
-  /** Query params for filtering */
+  /** Optional query params for filtering projects */
   params?: ProjectQueryParams;
 }
 
@@ -40,28 +58,50 @@ export interface UseProjectsManagerConfig {
  * Return type for useProjectsManager
  */
 export interface UseProjectsManagerReturn {
+  /** Array of projects. Falls back to cached data if server data is unavailable. */
   projects: Project[];
+  /** Whether projects are currently being fetched from the server */
   isLoading: boolean;
+  /** Error message from the most recent operation, or null */
   error: Optional<string>;
+  /** Whether the returned projects are from the Zustand cache */
   isCached: boolean;
+  /** Unix timestamp (ms) when the cache was last updated, or null */
   cachedAt: Optional<number>;
 
+  /** Force refresh projects from the server */
   refresh: () => Promise<void>;
+  /** Create a new project. Returns the created Project on success, or undefined on failure. */
   createProject: (data: ProjectCreateRequest) => Promise<Project | undefined>;
+  /** Update an existing project by its UUID */
   updateProject: (
     projectId: string,
     data: ProjectUpdateRequest
   ) => Promise<void>;
+  /** Delete a project by its UUID */
   deleteProject: (projectId: string) => Promise<void>;
+  /** Retrieve the full API key for a project (sensitive operation) */
   getProjectApiKey: (projectId: string) => Promise<GetApiKeyResponse | null>;
+  /** Generate a new API key for a project, invalidating the old one */
   refreshProjectApiKey: (
     projectId: string
   ) => Promise<RefreshApiKeyResponse | null>;
+  /** Clear the current error state */
   clearError: () => void;
 }
 
 /**
- * Manager hook for projects with caching
+ * Manager hook for projects with Zustand caching.
+ *
+ * @example
+ * ```tsx
+ * const { projects, isLoading, createProject } = useProjectsManager({
+ *   baseUrl: "https://api.shapeshyft.com",
+ *   networkClient,
+ *   entitySlug: "my-org",
+ *   token: firebaseToken,
+ * });
+ * ```
  */
 export const useProjectsManager = ({
   baseUrl,

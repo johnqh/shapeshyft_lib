@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/shapeshyft_lib",
-  "version": "0.0.73",
+  "version": "0.0.74",
   "description": "Business logic library for ShapeShyft with Zustand stores",
   "type": "module",
   "main": "dist/index.js",
@@ -22,7 +22,8 @@
     "lint:fix": "bunx eslint src --ext .ts,.tsx --fix",
     "format": "bunx prettier --write src/**/*.ts",
     "format:check": "bunx prettier --check src/**/*.ts",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "verify": "bun run typecheck && bun run lint && bun run test && bun run build"
   },
   "keywords": [
     "shapeshyft",

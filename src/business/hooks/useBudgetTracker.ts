@@ -1,6 +1,21 @@
 /**
  * Budget Tracker Hook
- * Track usage costs and manage budgets
+ *
+ * Track usage costs and manage budgets with threshold-based alerting.
+ *
+ * **Features**:
+ * - CRUD operations for budget definitions (persisted to localStorage)
+ * - Budget alert generation at 75% (warning), 90% (critical), and 100% (exceeded) thresholds
+ * - Project-scoped budgets that track only matching endpoint costs
+ * - Projected cost calculation based on current usage rate
+ * - Cost breakdown by endpoint with percentage-of-total
+ *
+ * **Storage**: The `useBudgetStore` uses Zustand's `persist` middleware to save
+ * budgets to localStorage under the key `"shapeshyft-budgets"`. This is intentionally
+ * different from other stores (keys, projects, etc.) which are purely in-memory,
+ * because budgets are user-defined configurations that should survive page reloads.
+ *
+ * @module
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -12,43 +27,74 @@ import type {
 } from '@sudobility/shapeshyft_types';
 
 /**
- * Budget period type
+ * Time period for budget tracking.
  */
 export type BudgetPeriod = 'daily' | 'weekly' | 'monthly';
 
 /**
- * Budget definition
+ * Budget definition representing a spending limit.
+ *
+ * Budgets can be global (tracking all endpoint costs) or project-scoped
+ * (tracking only endpoints whose `endpoint_id` starts with the given `projectId`).
  */
 export interface Budget {
+  /** Unique identifier (auto-generated on creation) */
   id: string;
+  /** Human-readable budget name */
   name: string;
+  /** Spending limit in cents (e.g., 10000 = $100.00) */
   limitCents: number;
+  /** Time period this budget tracks */
   period: BudgetPeriod;
+  /**
+   * Optional project ID to scope this budget.
+   * When set, only endpoints whose `endpoint_id` starts with this value are counted.
+   * When undefined, all endpoint costs (aggregate total) are counted.
+   */
   projectId?: string;
+  /** Unix timestamp (ms) when this budget was created */
   createdAt: number;
 }
 
 /**
- * Budget alert
+ * Alert generated when a budget approaches or exceeds its limit.
+ *
+ * Thresholds:
+ * - **warning**: 75-89% of limit used
+ * - **critical**: 90-99% of limit used
+ * - **exceeded**: 100%+ of limit used
  */
 export interface BudgetAlert {
+  /** ID of the budget that triggered this alert */
   budgetId: string;
+  /** Name of the budget that triggered this alert */
   budgetName: string;
+  /** Current spend in cents */
   currentSpendCents: number;
+  /** Budget limit in cents */
   limitCents: number;
+  /** Percentage of budget used (e.g., 95.5 means 95.5%) */
   percentUsed: number;
+  /** Alert severity level */
   severity: 'warning' | 'critical' | 'exceeded';
+  /** Human-readable alert message with dollar amounts and percentage */
   message: string;
 }
 
 /**
- * Cost breakdown item
+ * Cost breakdown for a single endpoint.
+ * Used to display which endpoints are consuming the most budget.
  */
 export interface CostBreakdownItem {
+  /** Endpoint UUID */
   endpointId: string;
+  /** Endpoint display name */
   endpointName: string;
+  /** Total cost in cents for this endpoint */
   totalCostCents: number;
+  /** Number of requests to this endpoint */
   requestCount: number;
+  /** Percentage of total cost across all endpoints (0-100) */
   percentOfTotal: number;
 }
 
@@ -198,7 +244,16 @@ export const useBudgetTracker = (): UseBudgetTrackerReturn => {
   );
 
   /**
-   * Calculate projected cost based on current usage rate
+   * Calculate projected cost based on current usage rate.
+   *
+   * **Note**: This uses a simplistic assumption that the current total
+   * `total_estimated_cost_cents` equals one day's worth of usage. For more
+   * accurate projections, the caller should divide the total by the number
+   * of days elapsed in the current period before passing it here.
+   *
+   * @param currentUsage - Current usage aggregate (treated as a daily rate)
+   * @param daysRemaining - Number of days remaining in the budget period
+   * @returns Projected cost in cents for the remaining period
    */
   const calculateProjectedCost = useCallback(
     (currentUsage: UsageAggregate, daysRemaining: number): number => {

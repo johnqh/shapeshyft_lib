@@ -1,6 +1,21 @@
 /**
  * Keys Manager Hook
- * Business logic hook that wraps the client useKeys hook with Zustand caching
+ *
+ * Business logic hook that wraps the client `useKeys` hook with Zustand caching.
+ *
+ * **Data flow**:
+ * 1. On mount (if `autoFetch` is true and `token` is available), fetches keys from the server
+ *    via `@sudobility/shapeshyft_client`'s `useKeys` hook.
+ * 2. When server data arrives, it is synced to the Zustand `useKeysStore` for caching.
+ * 3. The returned `keys` array prefers fresh server data. If server data is empty
+ *    (e.g., during loading or network failure), it falls back to cached data.
+ * 4. The `isCached` flag indicates whether the returned data is from the cache
+ *    (true) or fresh from the server (false).
+ *
+ * **Entity scoping**: All data is scoped by `entitySlug`. Switching entities
+ * will fetch new data and update the cache under the new key.
+ *
+ * @module
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
@@ -18,13 +33,20 @@ import { useKeysStore } from '../stores/keysStore';
  * Configuration for useKeysManager
  */
 export interface UseKeysManagerConfig {
+  /** Base URL of the ShapeShyft API (e.g., "https://api.shapeshyft.com") */
   baseUrl: string;
+  /** Network client instance for making HTTP requests */
   networkClient: NetworkClient;
+  /** Entity slug (organization path) to scope the keys to */
   entitySlug: string;
+  /** Firebase ID token for authentication, or null if not yet authenticated */
   token: Optional<FirebaseIdToken>;
-  /** Testnet/sandbox mode */
+  /** Enable testnet/sandbox mode (default: false) */
   testMode?: boolean;
-  /** Auto-fetch on mount when token is available */
+  /**
+   * Auto-fetch keys on mount when token is available (default: true).
+   * Set to false to defer fetching until `refresh()` is called manually.
+   */
   autoFetch?: boolean;
 }
 
@@ -32,21 +54,46 @@ export interface UseKeysManagerConfig {
  * Return type for useKeysManager
  */
 export interface UseKeysManagerReturn {
+  /** Array of LLM API keys. Falls back to cached data if server data is unavailable. */
   keys: LlmApiKeySafe[];
+  /** Whether keys are currently being fetched from the server */
   isLoading: boolean;
+  /** Error message from the most recent operation, or null */
   error: Optional<string>;
+  /** Whether the returned keys are from the Zustand cache (not fresh from server) */
   isCached: boolean;
+  /** Unix timestamp (ms) when the cache was last updated, or null if not cached */
   cachedAt: Optional<number>;
 
+  /** Force refresh keys from the server, bypassing cache */
   refresh: () => Promise<void>;
+  /** Create a new LLM API key */
   createKey: (data: LlmApiKeyCreateRequest) => Promise<void>;
+  /** Update an existing LLM API key */
   updateKey: (keyId: string, data: LlmApiKeyUpdateRequest) => Promise<void>;
+  /** Delete an LLM API key by its UUID */
   deleteKey: (keyId: string) => Promise<void>;
+  /** Clear the current error state */
   clearError: () => void;
 }
 
 /**
- * Manager hook for LLM API keys with caching
+ * Manager hook for LLM API keys with Zustand caching.
+ *
+ * Wraps `@sudobility/shapeshyft_client`'s `useKeys` hook and adds:
+ * - Automatic cache synchronization to `useKeysStore`
+ * - Cache fallback when server data is empty
+ * - `isCached`/`cachedAt` metadata for UI staleness indicators
+ *
+ * @example
+ * ```tsx
+ * const { keys, isLoading, createKey } = useKeysManager({
+ *   baseUrl: "https://api.shapeshyft.com",
+ *   networkClient,
+ *   entitySlug: "my-org",
+ *   token: firebaseToken,
+ * });
+ * ```
  */
 export const useKeysManager = ({
   baseUrl,

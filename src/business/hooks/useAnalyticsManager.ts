@@ -1,6 +1,17 @@
 /**
  * Analytics Manager Hook
- * Business logic hook that wraps the client useAnalytics hook with Zustand caching
+ *
+ * Business logic hook that wraps the client `useAnalytics` hook with Zustand caching.
+ *
+ * **Data flow**:
+ * 1. On mount (if `autoFetch` is true and `token` is available), fetches analytics from the server.
+ * 2. Server data is synced to `useAnalyticsStore` for caching.
+ * 3. Returns fresh server data when available, falls back to cached data otherwise.
+ * 4. `isCached` flag indicates whether the data source is the cache.
+ *
+ * **User scoping**: All data is scoped by `userId`.
+ *
+ * @module
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
@@ -20,15 +31,22 @@ import { useAnalyticsStore } from '../stores/analyticsStore';
  * Configuration for useAnalyticsManager
  */
 export interface UseAnalyticsManagerConfig {
+  /** Base URL of the ShapeShyft API */
   baseUrl: string;
+  /** Network client instance for making HTTP requests */
   networkClient: NetworkClient;
+  /** User ID to fetch analytics for */
   userId: string;
+  /** Firebase ID token for authentication, or null if not yet authenticated */
   token: Optional<FirebaseIdToken>;
-  /** Testnet/sandbox mode */
+  /** Enable testnet/sandbox mode (default: false) */
   testMode?: boolean;
-  /** Auto-fetch on mount when token is available */
+  /**
+   * Auto-fetch analytics on mount when token is available (default: true).
+   * Set to false to defer fetching until `refresh()` is called manually.
+   */
   autoFetch?: boolean;
-  /** Query params for filtering */
+  /** Optional query params for filtering analytics (date range, project, etc.) */
   params?: UsageAnalyticsQueryParams;
 }
 
@@ -36,18 +54,36 @@ export interface UseAnalyticsManagerConfig {
  * Return type for useAnalyticsManager
  */
 export interface UseAnalyticsManagerReturn {
+  /** Analytics response. Falls back to cached data if server data is unavailable. Null if neither. */
   analytics: Optional<AnalyticsResponse>;
+  /** Whether analytics are currently being fetched from the server */
   isLoading: boolean;
+  /** Error message from the most recent operation, or null */
   error: Optional<string>;
+  /** Whether the returned analytics are from the Zustand cache */
   isCached: boolean;
+  /** Unix timestamp (ms) when the cache was last updated, or null */
   cachedAt: Optional<number>;
 
+  /** Force refresh analytics from the server */
   refresh: () => Promise<void>;
+  /** Clear the current error state */
   clearError: () => void;
 }
 
 /**
- * Manager hook for analytics with caching
+ * Manager hook for analytics with Zustand caching.
+ *
+ * @example
+ * ```tsx
+ * const { analytics, isLoading, refresh } = useAnalyticsManager({
+ *   baseUrl: "https://api.shapeshyft.com",
+ *   networkClient,
+ *   userId: "user-123",
+ *   token: firebaseToken,
+ *   params: { start_date: "2025-01-01" },
+ * });
+ * ```
  */
 export const useAnalyticsManager = ({
   baseUrl,
