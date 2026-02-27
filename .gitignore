@@ -56,3 +56,6 @@ temp/
 yarn.lock
 pnpm-lock.yaml
 .quality-report.json
+
+# Claude Code local settings
+.claude/settings.local.json
