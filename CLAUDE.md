@@ -139,21 +139,6 @@ shapeshyft_app (frontend)
             └── shapeshyft_types (types)
 ```
 
-## Testing
-
-Uses Vitest:
-
-```bash
-bun run test         # Watch mode
-bun run test:run     # Single run
-```
-
-Test coverage:
-- Store CRUD operations
-- Cache isolation between stores
-- Template structure validation
-- Template application
-
 ## Workspace Context
 
 This project is part of the **ShapeShyft** multi-project workspace at the parent directory. See `../CLAUDE.md` for the full architecture, dependency graph, and build order.
