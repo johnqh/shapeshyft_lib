@@ -6,7 +6,7 @@
       "name": "@sudobility/shapeshyft_lib",
       "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@sudobility/shapeshyft_client": "^0.0.72",
+        "@sudobility/shapeshyft_client": "^0.0.73",
         "@sudobility/shapeshyft_types": "^1.0.50",
         "@sudobility/types": "^1.9.61",
         "@tanstack/react-query": "^5.90.5",
@@ -25,7 +25,7 @@
         "zustand": "^5.0.8",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.72",
+        "@sudobility/shapeshyft_client": "^0.0.73",
         "@sudobility/shapeshyft_types": "^1.0.50",
         "@sudobility/types": "^1.9.61",
         "@tanstack/react-query": ">=5.0.0",
@@ -203,7 +203,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.72", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.50", "@sudobility/types": "^1.9.61", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-N5jYu4Fx/Wo8LDE2bQdRitsvVlx5F9m9dRdiOZiMtHPR5tZz1WtRQM68CsLxRVLvmwL+WGOntYvcVRv5jw6lLg=="],
+    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.73", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.50", "@sudobility/types": "^1.9.61", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-ZR/Zpa2ph9VIw5sEYArDqzBgzgUSEI2S4c+N7iP9sdhUzxci1g6ZQkgXSOrpz10XznHlmIpDU3met/Tzqy2QGA=="],
 
     "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.50", "", { "peerDependencies": { "@sudobility/types": "^1.9.61" } }, "sha512-swrbLMasgBTlT/lWanj7lMCY94ma98SHlE0YRuUHQVpI5aySnAk68ELGnLL7yzMNUOyHJTob+ovwMCYtLfgtNg=="],
 
