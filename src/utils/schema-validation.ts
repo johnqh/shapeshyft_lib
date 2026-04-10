@@ -130,6 +130,21 @@ export function generateSampleValue(schema: JsonSchema, key?: string): unknown {
       return [];
 
     case 'object':
+      // Map type: object with x-map and additionalProperties but no fixed properties
+      if (
+        (schema as Record<string, unknown>)['x-map'] &&
+        schema.additionalProperties &&
+        typeof schema.additionalProperties === 'object'
+      ) {
+        const keyDesc = (schema as Record<string, unknown>)[
+          'x-key-description'
+        ] as string | undefined;
+        const sampleKey = keyDesc
+          ? `sample_${keyDesc.split(/[\s(,]/)[0].toLowerCase()}`
+          : 'sample_key';
+        const valueSchema = schema.additionalProperties as JsonSchema;
+        return { [sampleKey]: generateSampleValue(valueSchema) };
+      }
       if (schema.properties) {
         const obj: Record<string, unknown> = {};
         for (const [propKey, propSchema] of Object.entries(schema.properties)) {
@@ -254,29 +269,43 @@ export function validateValue(
     case 'object':
       if (typeof value !== 'object' || Array.isArray(value)) {
         errors.push(`${path}: expected object, got ${typeof value}`);
-      } else if (schema.properties) {
+      } else {
         const obj = value as Record<string, unknown>;
 
-        // Check required properties
-        if (schema.required) {
-          for (const reqKey of schema.required) {
-            if (!(reqKey in obj)) {
-              errors.push(`${path}: missing required property "${reqKey}"`);
+        // Map type: validate all values against additionalProperties schema
+        if (
+          (schema as Record<string, unknown>)['x-map'] &&
+          schema.additionalProperties &&
+          typeof schema.additionalProperties === 'object'
+        ) {
+          const valueSchema = schema.additionalProperties as JsonSchema;
+          for (const [key, propValue] of Object.entries(obj)) {
+            errors.push(
+              ...validateValue(propValue, valueSchema, `${path}["${key}"]`)
+            );
+          }
+        } else if (schema.properties) {
+          // Check required properties
+          if (schema.required) {
+            for (const reqKey of schema.required) {
+              if (!(reqKey in obj)) {
+                errors.push(`${path}: missing required property "${reqKey}"`);
+              }
             }
           }
-        }
 
-        // Validate each property
-        for (const [key, propValue] of Object.entries(obj)) {
-          const propSchema = schema.properties[key];
-          if (propSchema) {
-            errors.push(
-              ...validateValue(
-                propValue,
-                propSchema as JsonSchema,
-                `${path}.${key}`
-              )
-            );
+          // Validate each property
+          for (const [key, propValue] of Object.entries(obj)) {
+            const propSchema = schema.properties[key];
+            if (propSchema) {
+              errors.push(
+                ...validateValue(
+                  propValue,
+                  propSchema as JsonSchema,
+                  `${path}.${key}`
+                )
+              );
+            }
           }
         }
       }
