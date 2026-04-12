@@ -197,9 +197,7 @@ describe('schema-validation', () => {
 
     describe('string validation', () => {
       it('should accept valid string', () => {
-        expect(
-          validateValue('hello', { type: 'string' }, 'root')
-        ).toEqual([]);
+        expect(validateValue('hello', { type: 'string' }, 'root')).toEqual([]);
       });
 
       it('should reject non-string value', () => {
@@ -240,31 +238,19 @@ describe('schema-validation', () => {
 
       it('should accept valid enum value', () => {
         expect(
-          validateValue(
-            'b',
-            { type: 'string', enum: ['a', 'b', 'c'] },
-            'root'
-          )
+          validateValue('b', { type: 'string', enum: ['a', 'b', 'c'] }, 'root')
         ).toEqual([]);
       });
 
       it('should pass minLength at boundary', () => {
         expect(
-          validateValue(
-            'abc',
-            { type: 'string', minLength: 3 },
-            'root'
-          )
+          validateValue('abc', { type: 'string', minLength: 3 }, 'root')
         ).toEqual([]);
       });
 
       it('should pass maxLength at boundary', () => {
         expect(
-          validateValue(
-            'abc',
-            { type: 'string', maxLength: 3 },
-            'root'
-          )
+          validateValue('abc', { type: 'string', maxLength: 3 }, 'root')
         ).toEqual([]);
       });
     });
@@ -281,11 +267,7 @@ describe('schema-validation', () => {
       });
 
       it('should validate minimum', () => {
-        const errors = validateValue(
-          3,
-          { type: 'number', minimum: 5 },
-          'root'
-        );
+        const errors = validateValue(3, { type: 'number', minimum: 5 }, 'root');
         expect(errors).toHaveLength(1);
         expect(errors[0]).toContain('less than minimum 5');
       });
@@ -331,15 +313,11 @@ describe('schema-validation', () => {
 
     describe('boolean validation', () => {
       it('should accept true', () => {
-        expect(validateValue(true, { type: 'boolean' }, 'root')).toEqual(
-          []
-        );
+        expect(validateValue(true, { type: 'boolean' }, 'root')).toEqual([]);
       });
 
       it('should accept false', () => {
-        expect(validateValue(false, { type: 'boolean' }, 'root')).toEqual(
-          []
-        );
+        expect(validateValue(false, { type: 'boolean' }, 'root')).toEqual([]);
       });
 
       it('should reject non-boolean', () => {
@@ -453,13 +431,11 @@ describe('schema-validation', () => {
             },
           },
         };
-        const errors = validateValue(
-          { user: {} },
-          schema,
-          'root'
-        );
+        const errors = validateValue({ user: {} }, schema, 'root');
         expect(errors).toHaveLength(1);
-        expect(errors[0]).toContain('root.user: missing required property "name"');
+        expect(errors[0]).toContain(
+          'root.user: missing required property "name"'
+        );
       });
 
       it('should allow extra properties not in schema', () => {
@@ -470,11 +446,7 @@ describe('schema-validation', () => {
           },
         };
         expect(
-          validateValue(
-            { name: 'Alice', extra: 'field' },
-            schema,
-            'root'
-          )
+          validateValue({ name: 'Alice', extra: 'field' }, schema, 'root')
         ).toEqual([]);
       });
 
@@ -508,11 +480,7 @@ describe('schema-validation', () => {
             },
           },
         };
-        const errors = validateValue(
-          { items: [{ name: 42 }] },
-          schema,
-          'root'
-        );
+        const errors = validateValue({ items: [{ name: 42 }] }, schema, 'root');
         expect(errors).toHaveLength(1);
         expect(errors[0]).toContain(
           'root.items[0].name: expected string, got number'
