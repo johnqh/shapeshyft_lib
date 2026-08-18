@@ -6,8 +6,8 @@
       "name": "@sudobility/shapeshyft_lib",
       "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@sudobility/shapeshyft_client": "^0.0.83",
-        "@sudobility/shapeshyft_types": "^1.0.53",
+        "@sudobility/shapeshyft_client": "^0.0.86",
+        "@sudobility/shapeshyft_types": "^1.0.56",
         "@sudobility/types": "^1.9.65",
         "@tanstack/react-query": "^5.90.5",
         "@types/node": "^24.9.1",
@@ -25,8 +25,8 @@
         "zustand": "^5.0.8",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.83",
-        "@sudobility/shapeshyft_types": "^1.0.53",
+        "@sudobility/shapeshyft_client": "^0.0.86",
+        "@sudobility/shapeshyft_types": "^1.0.56",
         "@sudobility/types": "^1.9.65",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -203,9 +203,9 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.83", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.53", "@sudobility/types": "^1.9.65", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-RUrYSe1PCimU9b3jpNNoouL36+zHicABRHZVQ5uSRXhAziwgMd2WdrCpRyF41O5lEyIDxGJxwFuMC8F/RHjZlg=="],
+    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.86", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.56", "@sudobility/types": "^1.9.65", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-RHAzoihcN9bgzix4073M8krJnONy7LBGwIR7QfdvAFGnjuwf9q+Op0SliFmMxK4UI7UDaBNseoLAHehVMhonCg=="],
 
-    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.53", "", { "peerDependencies": { "@sudobility/types": "^1.9.65" } }, "sha512-i/AFbc33FjWl2jR15BbIFoomvAS7How2+VahnT2aDfdwZZXUwM2PaAp/xSiFD+9zQJX+yyvwMWTm0/slHeuHLQ=="],
+    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.56", "", { "peerDependencies": { "@sudobility/types": "^1.9.65" } }, "sha512-IjZu44K9kilhDgIp4x8635zfNCE3D/5KT0PiXwMeSz7UGbVKuhTKy56ztBvBISZRy1tOZICa21typSflg7UMxg=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.65", "", {}, "sha512-NSq2/naehtQO3s6uhCa9+zGLQZkPNYhlb9NUtjS704ppvc+UbtGoSAzNQGLORDbha2YGJORE3/xs2UARZQdroA=="],
 
