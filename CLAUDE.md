@@ -1,5 +1,10 @@
 # ShapeShyft Lib
 
+> **Git policy — never auto-commit or auto-push.** Leave your work in the working tree.
+> Run `git commit`, `git push`, `gh pr create`, or `scripts/push_all.sh` **only when the user
+> explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
+> finishing a task is not permission to commit it.
+
 Business logic library for ShapeShyft with Zustand stores, manager hooks, and endpoint templates (v0.0.84).
 
 **npm**: `@sudobility/shapeshyft_lib`
@@ -389,3 +394,7 @@ npm publish             # Publish to npm (must use npm, not bun)
 - **Schema validation is intentionally lightweight** -- no support for `$ref`, combinators, or advanced JSON Schema features.
 - **`bun run test` is watch mode** -- use `bun run test:run` for single run (CI).
 - **Budget periods have no auto-reset** -- `BudgetPeriod = 'daily' | 'weekly' | 'monthly'` but clients must handle period boundaries.
+
+## Git Workflow
+
+- Do not use feature branches for code changes. Always stay on the current branch.
