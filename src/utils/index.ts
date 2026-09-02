@@ -12,3 +12,4 @@ export {
   generateSampleInput,
   keyToSampleLabel,
 } from './schema-validation';
+export { extractTestMetrics, type TestMetrics } from './test-metrics';

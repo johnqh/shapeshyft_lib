@@ -15,6 +15,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type {
   Endpoint,
+  FinishReason,
   GeneratedMedia,
   HttpMethod,
   JsonSchema,
@@ -27,6 +28,7 @@ import {
   validateValue,
   type ValidationResult,
 } from '../../utils/schema-validation';
+import { extractTestMetrics } from '../../utils/test-metrics';
 
 /**
  * Result of testing an endpoint with sample data.
@@ -59,6 +61,14 @@ export interface TestResult {
   tokensOutput: Optional<number>;
   /** Generated media from models like GPT-4o (audio), Imagen (images), Veo (video) */
   generatedMedia: Optional<GeneratedMedia[]>;
+  /** Why the model stopped generating, or null if the provider reported nothing */
+  finishReason: Optional<FinishReason>;
+  /**
+   * True when the model hit its output ceiling and the output is cut off.
+   * A truncated result usually fails schema validation, so surfacing this
+   * separately is what stops it being read as a malformed model.
+   */
+  truncated: boolean;
 }
 
 // Re-export ValidationResult from the schema-validation utility
@@ -197,6 +207,8 @@ export const useEndpointTester = (
             tokensInput: null,
             tokensOutput: null,
             generatedMedia: null,
+            finishReason: null,
+            truncated: false,
           };
           setTestResults(prev => [result, ...prev]);
           return result;
@@ -217,8 +229,7 @@ export const useEndpointTester = (
 
         // Extract fields from response data
         const responseData = response.success ? response.data : null;
-        const hasResponseData =
-          responseData && typeof responseData === 'object';
+        const metrics = extractTestMetrics(responseData);
 
         const result: TestResult = {
           id: testId,
@@ -230,21 +241,11 @@ export const useEndpointTester = (
           error: response.error ?? null,
           timestamp: Date.now(),
           latencyMs,
-          tokensInput:
-            hasResponseData && 'usage' in responseData
-              ? (responseData as { usage: { tokens_input: number } }).usage
-                  .tokens_input
-              : null,
-          tokensOutput:
-            hasResponseData && 'usage' in responseData
-              ? (responseData as { usage: { tokens_output: number } }).usage
-                  .tokens_output
-              : null,
-          generatedMedia:
-            hasResponseData && 'generated_media' in responseData
-              ? (responseData as { generated_media: GeneratedMedia[] })
-                  .generated_media
-              : null,
+          tokensInput: metrics.tokensInput,
+          tokensOutput: metrics.tokensOutput,
+          generatedMedia: metrics.generatedMedia,
+          finishReason: metrics.finishReason,
+          truncated: metrics.truncated,
         };
 
         setTestResults(prev => [result, ...prev]);
@@ -266,6 +267,8 @@ export const useEndpointTester = (
           tokensInput: null,
           tokensOutput: null,
           generatedMedia: null,
+          finishReason: null,
+          truncated: false,
         };
 
         setTestResults(prev => [result, ...prev]);
