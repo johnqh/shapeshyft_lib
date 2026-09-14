@@ -7,7 +7,7 @@
       "devDependencies": {
         "@eslint/js": "^9.39.2",
         "@sudobility/shapeshyft_client": "^0.0.93",
-        "@sudobility/shapeshyft_types": "^1.0.62",
+        "@sudobility/shapeshyft_types": "^1.1.1",
         "@sudobility/types": "^1.9.67",
         "@tanstack/react-query": "^5.90.5",
         "@types/node": "^24.9.1",
@@ -26,7 +26,7 @@
       },
       "peerDependencies": {
         "@sudobility/shapeshyft_client": "^0.0.93",
-        "@sudobility/shapeshyft_types": "^1.0.62",
+        "@sudobility/shapeshyft_types": "^1.1.1",
         "@sudobility/types": "^1.9.67",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -205,7 +205,9 @@
 
     "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.93", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.0.62", "@sudobility/types": "^1.9.67", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-1ycKjv6yO/m3o+AYhkbQtD+p4u9psrcuUja+8j//2mNua7syw0DyOnOQKIRLFkTDh6rBm42lTomny0AemPRUiQ=="],
 
-    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.0.62", "", { "peerDependencies": { "@sudobility/types": "^1.9.67" } }, "sha512-EsMNP1dfewHx0D2IzuQ+OsG3JOlREsqwQDODPpq8qBflEuvmN35uB26Rwjgc5MyPDMLEOSjHa43NL52EqZqFmg=="],
+    "@sudobility/shapeshyft_engine": ["@sudobility/shapeshyft_engine@1.0.1", "", { "dependencies": { "@sudobility/types": "^1.9.67" }, "peerDependencies": { "@anthropic-ai/sdk": "^0.39.0", "@google/generative-ai": "^0.21.0", "groq-sdk": "^0.37.0", "openai": "^4.77.0", "sharp": "^0.34.5" }, "optionalPeers": ["@anthropic-ai/sdk", "@google/generative-ai", "groq-sdk", "openai", "sharp"] }, "sha512-G85zVoqIVI+kJIr70XralnT+sy6FHahd40I5tzIQDdfJz+aIO4Vm1B6CNrEwlbW1TZA6yP74qRnuZT3r8xtw8w=="],
+
+    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.1.1", "", { "dependencies": { "@sudobility/shapeshyft_engine": "^1.0.1" }, "peerDependencies": { "@sudobility/types": "^1.9.67" } }, "sha512-/lueGCAp72IZaTYHkFQ2WH7FcIKhaUyhRwaXDaM1bb5yiptazuOys9MpkDNN1w1+VvBsnRf6QMJS39fCxgH9qQ=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.67", "", {}, "sha512-d+jk4L9i8VNvOnCJW/craqiiUTPH5aRq4KYe/QBrBU3mCcTfoYjgzzXopVQRcthiZ5dwQAEpdqCTQ0gAWRN6Ww=="],
 
