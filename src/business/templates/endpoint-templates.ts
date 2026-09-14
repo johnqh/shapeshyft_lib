@@ -8,16 +8,17 @@
  * Templates are organized by category (Classification, Analysis, Extraction,
  * Generation, Translation, Vision, Transcription, Processing) and can be
  * applied via {@link applyTemplate} to create `ProjectCreateRequest` and
- * `EndpointCreateRequest` objects ready for API submission.
+ * `EndpointCreatePayload` objects ready for API submission.
  *
  * @module
  */
 
 import type {
-  EndpointCreateRequest,
   JsonSchema,
   ProjectCreateRequest,
 } from '@sudobility/shapeshyft_types';
+import type { EndpointCreatePayload } from '@sudobility/shapeshyft_client';
+import { type EndpointBindingInput, toBindingFields } from './binding';
 
 /**
  * Project template definition.
@@ -894,17 +895,18 @@ export const ALL_TEMPLATES: ProjectTemplate[] = [
  * Apply a template to create project and endpoint requests
  * @param template - The template to apply
  * @param projectName - The project slug/name (lowercase, hyphen-separated)
- * @param llmKeyId - The LLM key ID to use for endpoints
+ * @param binding - Provider binding fields for every endpoint, e.g. `{ llm_key_id }`
+ *   or `{ provider }`. A string is treated as an LLM key id.
  * @param displayName - Optional custom display name (defaults to template.name)
  */
 export function applyTemplate(
   template: ProjectTemplate,
   projectName: string,
-  llmKeyId: string,
+  binding: EndpointBindingInput,
   displayName?: string
 ): {
   project: ProjectCreateRequest;
-  endpoints: EndpointCreateRequest[];
+  endpoints: EndpointCreatePayload[];
 } {
   const project: ProjectCreateRequest = {
     project_name: projectName,
@@ -912,16 +914,17 @@ export function applyTemplate(
     description: template.description,
   };
 
-  const endpoints: EndpointCreateRequest[] = template.endpoints.map(ep => ({
+  const bindingFields = toBindingFields(binding);
+  const endpoints: EndpointCreatePayload[] = template.endpoints.map(ep => ({
     endpoint_name: ep.endpoint_name,
     display_name: ep.display_name,
     http_method: 'POST',
-    llm_key_id: llmKeyId,
     model: null,
     input_schema: ep.input_schema,
     output_schema: ep.output_schema,
     instructions: ep.instructions,
     context: ep.context,
+    ...bindingFields,
   }));
 
   return { project, endpoints };

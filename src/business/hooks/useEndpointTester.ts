@@ -59,6 +59,8 @@ export interface TestResult {
   tokensInput: Optional<number>;
   /** Number of output tokens generated (null if not reported) */
   tokensOutput: Optional<number>;
+  /** The API's cost estimate in cents (null if not reported) */
+  estimatedCostCents: Optional<number>;
   /** Generated media from models like GPT-4o (audio), Imagen (images), Veo (video) */
   generatedMedia: Optional<GeneratedMedia[]>;
   /** Why the model stopped generating, or null if the provider reported nothing */
@@ -206,6 +208,7 @@ export const useEndpointTester = (
             latencyMs: null,
             tokensInput: null,
             tokensOutput: null,
+            estimatedCostCents: null,
             generatedMedia: null,
             finishReason: null,
             truncated: false,
@@ -243,6 +246,7 @@ export const useEndpointTester = (
           latencyMs,
           tokensInput: metrics.tokensInput,
           tokensOutput: metrics.tokensOutput,
+          estimatedCostCents: metrics.estimatedCostCents,
           generatedMedia: metrics.generatedMedia,
           finishReason: metrics.finishReason,
           truncated: metrics.truncated,
@@ -266,6 +270,7 @@ export const useEndpointTester = (
           latencyMs: Date.now() - startTime,
           tokensInput: null,
           tokensOutput: null,
+          estimatedCostCents: null,
           generatedMedia: null,
           finishReason: null,
           truncated: false,

@@ -18,6 +18,12 @@ export interface TestMetrics {
   tokensInput: number | null;
   /** Output tokens generated, or null when the response did not report usage */
   tokensOutput: number | null;
+  /**
+   * The API's own cost estimate, in cents, or null when it sent none. It
+   * prices what a token count alone cannot: thinking, caching, search and
+   * request fees, so prefer it to recomputing from tokens.
+   */
+  estimatedCostCents: number | null;
   /** Why the model stopped, or null when the provider reported nothing */
   finishReason: FinishReason | null;
   /** True when generation stopped at the output ceiling and `output` is cut off */
@@ -29,6 +35,7 @@ export interface TestMetrics {
 const EMPTY_METRICS: TestMetrics = {
   tokensInput: null,
   tokensOutput: null,
+  estimatedCostCents: null,
   finishReason: null,
   truncated: false,
   generatedMedia: null,
@@ -61,6 +68,10 @@ export function extractTestMetrics(responseData: unknown): TestMetrics {
       typeof usage?.tokens_input === 'number' ? usage.tokens_input : null,
     tokensOutput:
       typeof usage?.tokens_output === 'number' ? usage.tokens_output : null,
+    estimatedCostCents:
+      typeof usage?.estimated_cost_cents === 'number'
+        ? usage.estimated_cost_cents
+        : null,
     finishReason,
     // Trust the explicit flag, but a finish_reason of "length" means the same
     // thing -- don't miss a truncation just because the flag was absent.

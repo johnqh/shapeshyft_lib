@@ -4,10 +4,9 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type {
-  EndpointCreateRequest,
-  ProjectCreateRequest,
-} from '@sudobility/shapeshyft_types';
+import type { ProjectCreateRequest } from '@sudobility/shapeshyft_types';
+import type { EndpointCreatePayload } from '@sudobility/shapeshyft_client';
+import type { EndpointBindingInput } from '../templates/binding';
 import {
   ALL_TEMPLATES,
   applyTemplate,
@@ -25,12 +24,12 @@ export interface UseProjectTemplatesReturn {
   applyTemplate: (
     templateId: string,
     projectName: string,
-    llmKeyId: string,
+    binding: EndpointBindingInput,
     displayName?: string
   ) =>
     | {
         project: ProjectCreateRequest;
-        endpoints: EndpointCreateRequest[];
+        endpoints: EndpointCreatePayload[];
       }
     | undefined;
 }
@@ -71,19 +70,19 @@ export const useProjectTemplates = (): UseProjectTemplatesReturn => {
     (
       templateId: string,
       projectName: string,
-      llmKeyId: string,
+      binding: EndpointBindingInput,
       displayName?: string
     ):
       | {
           project: ProjectCreateRequest;
-          endpoints: EndpointCreateRequest[];
+          endpoints: EndpointCreatePayload[];
         }
       | undefined => {
       const template = getTemplate(templateId);
       if (!template) {
         return undefined;
       }
-      return applyTemplate(template, projectName, llmKeyId, displayName);
+      return applyTemplate(template, projectName, binding, displayName);
     },
     [getTemplate]
   );

@@ -6,8 +6,8 @@
       "name": "@sudobility/shapeshyft_lib",
       "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@sudobility/shapeshyft_client": "^0.0.94",
-        "@sudobility/shapeshyft_types": "^1.1.1",
+        "@sudobility/shapeshyft_client": "^0.0.95",
+        "@sudobility/shapeshyft_types": "^1.1.2",
         "@sudobility/types": "^1.9.67",
         "@tanstack/react-query": "^5.90.5",
         "@types/node": "^24.9.1",
@@ -25,8 +25,8 @@
         "zustand": "^5.0.8",
       },
       "peerDependencies": {
-        "@sudobility/shapeshyft_client": "^0.0.94",
-        "@sudobility/shapeshyft_types": "^1.1.1",
+        "@sudobility/shapeshyft_client": "^0.0.95",
+        "@sudobility/shapeshyft_types": "^1.1.2",
         "@sudobility/types": "^1.9.67",
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -203,11 +203,11 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.94", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.1.1", "@sudobility/types": "^1.9.67", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-TIGHCQNdkaPtPhI5CHE2fqYpnQW9MODtto3KP17P0+Ooae8XTSm5d4mOPo/dX6RDfYEz/BdtsaKHqpYeu5Wwxg=="],
+    "@sudobility/shapeshyft_client": ["@sudobility/shapeshyft_client@0.0.95", "", { "peerDependencies": { "@sudobility/shapeshyft_types": "^1.1.2", "@sudobility/types": "^1.9.67", "@tanstack/react-query": ">=5.0.0", "react": ">=18.0.0" } }, "sha512-tBUYDvGoCl+eCq9DakuauoJcBXcKGOn3wiupgrXTwuViuyVREvnyt8cDJ3y2mvBBm850GbJcTgKzMH3A5W/e3g=="],
 
-    "@sudobility/shapeshyft_engine": ["@sudobility/shapeshyft_engine@1.0.1", "", { "dependencies": { "@sudobility/types": "^1.9.67" }, "peerDependencies": { "@anthropic-ai/sdk": "^0.39.0", "@google/generative-ai": "^0.21.0", "groq-sdk": "^0.37.0", "openai": "^4.77.0", "sharp": "^0.34.5" }, "optionalPeers": ["@anthropic-ai/sdk", "@google/generative-ai", "groq-sdk", "openai", "sharp"] }, "sha512-G85zVoqIVI+kJIr70XralnT+sy6FHahd40I5tzIQDdfJz+aIO4Vm1B6CNrEwlbW1TZA6yP74qRnuZT3r8xtw8w=="],
+    "@sudobility/shapeshyft_engine": ["@sudobility/shapeshyft_engine@1.0.3", "", { "dependencies": { "@sudobility/types": "^1.9.67" }, "peerDependencies": { "@anthropic-ai/sdk": "^0.39.0", "@google/generative-ai": "^0.21.0", "groq-sdk": "^0.37.0", "openai": "^4.77.0", "sharp": "^0.35.4" }, "optionalPeers": ["@anthropic-ai/sdk", "@google/generative-ai", "groq-sdk", "openai", "sharp"] }, "sha512-rMASOTsAtdJrCdE6/cWwuyStZanOvXzTKxDwg8e3RFaVKsg+krEkElA0e4xdAXD8ChFnkg4fqaZZtWTAu0OLfw=="],
 
-    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.1.1", "", { "dependencies": { "@sudobility/shapeshyft_engine": "^1.0.1" }, "peerDependencies": { "@sudobility/types": "^1.9.67" } }, "sha512-/lueGCAp72IZaTYHkFQ2WH7FcIKhaUyhRwaXDaM1bb5yiptazuOys9MpkDNN1w1+VvBsnRf6QMJS39fCxgH9qQ=="],
+    "@sudobility/shapeshyft_types": ["@sudobility/shapeshyft_types@1.1.2", "", { "dependencies": { "@sudobility/shapeshyft_engine": "^1.0.3" }, "peerDependencies": { "@sudobility/types": "^1.9.67" } }, "sha512-kqtJ2w7IqdE/JLWWeXGHpPCIp/5OAd5N4494u1qgi/vq+uj6c9nHcz+yXxyp4AgOGhRt17F2Z2UseOBWOdCMKw=="],
 
     "@sudobility/types": ["@sudobility/types@1.9.67", "", {}, "sha512-d+jk4L9i8VNvOnCJW/craqiiUTPH5aRq4KYe/QBrBU3mCcTfoYjgzzXopVQRcthiZ5dwQAEpdqCTQ0gAWRN6Ww=="],
 

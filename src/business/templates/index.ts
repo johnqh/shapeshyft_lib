@@ -13,3 +13,4 @@ export {
   ALL_TEMPLATES,
   applyTemplate,
 } from './endpoint-templates';
+export { toBindingFields, type EndpointBindingInput } from './binding';

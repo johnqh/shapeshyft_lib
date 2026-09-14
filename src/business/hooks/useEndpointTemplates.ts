@@ -4,7 +4,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { EndpointCreateRequest } from '@sudobility/shapeshyft_types';
+import type { EndpointCreatePayload } from '@sudobility/shapeshyft_client';
+import {
+  type EndpointBindingInput,
+  toBindingFields,
+} from '../templates/binding';
 import {
   ALL_TEMPLATES,
   type EndpointTemplate,
@@ -33,8 +37,8 @@ export interface UseEndpointTemplatesReturn {
   /** Apply a template to create an endpoint request */
   applyEndpointTemplate: (
     template: EndpointTemplateWithCategory,
-    llmKeyId: string
-  ) => EndpointCreateRequest;
+    binding: EndpointBindingInput
+  ) => EndpointCreatePayload;
 }
 
 /**
@@ -85,18 +89,18 @@ export const useEndpointTemplates = (): UseEndpointTemplatesReturn => {
   const applyEndpointTemplate = useCallback(
     (
       template: EndpointTemplateWithCategory,
-      llmKeyId: string
-    ): EndpointCreateRequest => {
+      binding: EndpointBindingInput
+    ): EndpointCreatePayload => {
       return {
         endpoint_name: template.endpoint_name,
         display_name: template.display_name,
         http_method: 'POST',
-        llm_key_id: llmKeyId,
         model: undefined,
         input_schema: template.input_schema,
         output_schema: template.output_schema,
         instructions: template.instructions,
         context: template.context,
+        ...toBindingFields(binding),
       };
     },
     []

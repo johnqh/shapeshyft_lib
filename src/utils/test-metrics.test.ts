@@ -15,6 +15,20 @@ describe('extractTestMetrics', () => {
 
     expect(metrics.tokensInput).toBe(3143);
     expect(metrics.tokensOutput).toBe(948);
+    expect(metrics.estimatedCostCents).toBe(1);
+  });
+
+  it("keeps the API's sub-cent cost estimate at full precision", () => {
+    const metrics = extractTestMetrics({
+      output: {},
+      usage: {
+        tokens_input: 400,
+        tokens_output: 150,
+        estimated_cost_cents: 0.0065,
+      },
+    });
+
+    expect(metrics.estimatedCostCents).toBe(0.0065);
   });
 
   it('reports a truncated generation so it is not mistaken for a malformed model', () => {
@@ -92,6 +106,7 @@ describe('extractTestMetrics', () => {
     expect(metrics).toEqual({
       tokensInput: null,
       tokensOutput: null,
+      estimatedCostCents: null,
       finishReason: null,
       truncated: false,
       generatedMedia: null,

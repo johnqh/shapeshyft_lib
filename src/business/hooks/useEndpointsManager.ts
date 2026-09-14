@@ -17,13 +17,13 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import type {
   Endpoint,
-  EndpointCreateRequest,
   EndpointQueryParams,
-  EndpointUpdateRequest,
   NetworkClient,
   Optional,
 } from '@sudobility/shapeshyft_types';
 import {
+  type EndpointCreatePayload,
+  type EndpointUpdatePayload,
   type FirebaseIdToken,
   useEndpoints,
 } from '@sudobility/shapeshyft_client';
@@ -72,11 +72,11 @@ export interface UseEndpointsManagerReturn {
   /** Force refresh endpoints from the server */
   refresh: () => Promise<void>;
   /** Create a new endpoint. Returns the created Endpoint on success, or null on failure. */
-  createEndpoint: (data: EndpointCreateRequest) => Promise<Endpoint | null>;
+  createEndpoint: (data: EndpointCreatePayload) => Promise<Endpoint | null>;
   /** Update an existing endpoint. Returns true on success, false on failure. */
   updateEndpoint: (
     endpointId: string,
-    data: EndpointUpdateRequest
+    data: EndpointUpdatePayload
   ) => Promise<boolean>;
   /** Delete an endpoint by its UUID */
   deleteEndpoint: (endpointId: string) => Promise<void>;
@@ -170,7 +170,7 @@ export const useEndpointsManager = ({
    * Create a new endpoint
    */
   const createEndpoint = useCallback(
-    async (data: EndpointCreateRequest): Promise<Endpoint | null> => {
+    async (data: EndpointCreatePayload): Promise<Endpoint | null> => {
       const response = await clientCreateEndpoint(data);
       if (response.success && response.data) {
         return response.data;
@@ -186,7 +186,7 @@ export const useEndpointsManager = ({
   const updateEndpoint = useCallback(
     async (
       endpointId: string,
-      data: EndpointUpdateRequest
+      data: EndpointUpdatePayload
     ): Promise<boolean> => {
       const response = await clientUpdateEndpoint(endpointId, data);
       return response.success;
