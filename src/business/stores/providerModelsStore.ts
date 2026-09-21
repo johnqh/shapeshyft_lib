@@ -20,6 +20,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createSafeJSONStorage } from '../../utils/persist-storage';
 import type {
   LlmProvider,
   ModelInfo,
@@ -155,6 +156,7 @@ export const useProviderModelsStore = create<ProviderModelsStoreState>()(
     }),
     {
       name: 'shapeshyft-provider-models',
+      storage: createSafeJSONStorage<Pick<ProviderModelsStoreState, 'cache'>>(),
       // Only persist the cache, not the functions
       partialize: state => ({ cache: state.cache }),
     }

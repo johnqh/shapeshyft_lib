@@ -21,6 +21,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createSafeJSONStorage } from '../../utils/persist-storage';
 import type {
   UsageAggregate,
   UsageByEndpoint,
@@ -145,6 +146,7 @@ export const useBudgetStore = create<BudgetStoreState>()(
     }),
     {
       name: 'shapeshyft-budgets',
+      storage: createSafeJSONStorage<{ budgets: Budget[] }>(),
     }
   )
 );
